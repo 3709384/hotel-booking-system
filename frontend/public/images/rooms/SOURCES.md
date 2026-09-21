@@ -6,8 +6,8 @@ These local room images are sourced from the official Huazhu/H World brand pages
   https://www.hworld.com/hotel/hanting
   https://ows-cdn.huazhu.com/ows-nofficial/sys/other/2023/05/25/20230525220136fb25a3spm4qptw8.png
 
-- twn.jpg: Juzi Hotel official brand page, guest room image.
-  https://www.hworld.com/hotel/juzi
+- twn.jpg: All Seasons Hotel official brand page, bedding and sleep detail image.
+  https://www.hworld.com/hotel/quanji
   https://ows-cdn.huazhu.com/ows-nofficial/sys/other/2024/03/15/20240315124139m6xz13mkkcxgikf.jpg
 
 - dlx.jpg: All Seasons Hotel official brand page, guest room image.
@@ -18,9 +18,20 @@ These local room images are sourced from the official Huazhu/H World brand pages
   https://www.hworld.com/hotel/quanji
   https://ows-cdn.huazhu.com/ows-nofficial/sys/other/2024/03/15/20240315124151y5jgy3o2ozn4y08.jpg
 
-## Derived local variants
+## Additional Joya room photos
 
-- adv.jpg: local crop derived from the Hanting room photo used by std.jpg.
-- adt.jpg: local crop derived from the All Seasons room photo used by twn.jpg.
-- zpy.jpg: local crop derived from the All Seasons room photo used by dlx.jpg.
-- fam.jpg: local crop derived from the All Seasons room detail photo used by suite.jpg.
+- adv.jpg: Joya Hotel official brand page, guest room work desk photo.
+  https://www.hworld.com/hotel/joya
+  https://ows-cdn.huazhu.com/huazhu-website/sys/other/2022/05/09/20220509185406ux0rkb8ckmldpnl.png
+
+- adt.jpg: Joya Hotel official brand page, guest room seating photo.
+  https://www.hworld.com/hotel/joya
+  https://ows-cdn.huazhu.com/huazhu-website/sys/other/2022/05/09/20220509185346ulzokpuvcydo7ue.png
+
+- zpy.jpg: Joya Hotel official brand page, city-view guest room photo.
+  https://www.hworld.com/hotel/joya
+  https://ows-cdn.huazhu.com/huazhu-website/sys/other/2022/05/09/20220509185413aaswmst4vipn5w4.png
+
+- fam.jpg: Joya Hotel official brand page, guest room bathroom detail photo.
+  https://www.hworld.com/hotel/joya
+  https://ows-cdn.huazhu.com/huazhu-website/sys/other/2022/05/09/20220509185422zxwi2m3vlzaud1g.png
