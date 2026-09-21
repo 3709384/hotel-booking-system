@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
@@ -35,6 +37,17 @@ public class ReservationController {
     @GetMapping("/{orderNo}")
     public Result<ReservationVO> detail(@PathVariable String orderNo) {
         return Result.ok(reservationService.detail(orderNo, UserContext.get()));
+    }
+
+    @GetMapping("/search")
+    @RequireRole({"RECEPTIONIST", "ADMIN"})
+    public Result<PageResult<ReservationVO>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) LocalDate checkInDate,
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "20") long size) {
+        return Result.ok(reservationService.search(keyword, status, checkInDate, page, size));
     }
 
     @GetMapping("/mine")

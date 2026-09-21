@@ -6,6 +6,8 @@ import com.hotel.booking.module.reservation.dto.ReservationVO;
 import com.hotel.booking.module.reservation.entity.Reservation;
 import com.hotel.booking.security.LoginUser;
 
+import java.time.LocalDate;
+
 public interface ReservationService {
 
     /** 创建订单：校验库存 → 事务内逐夜扣减 → 生成订单与明细。 */
@@ -16,6 +18,9 @@ public interface ReservationService {
 
     /** 我的订单（分页）。 */
     PageResult<ReservationVO> mine(Long userId, String status, long page, long size);
+
+    /** 前台/管理员订单检索。 */
+    PageResult<ReservationVO> search(String keyword, String status, LocalDate checkInDate, long page, long size);
 
     /** 会员取消订单（含库存回滚、免费取消时限校验）。 */
     ReservationVO cancel(String orderNo, Long userId);

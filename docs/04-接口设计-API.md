@@ -133,6 +133,7 @@
 | 21 | POST | /admin/inventory/init                 | ADMIN         | 初始化 / 补齐日期库存  |
 | 22 | GET  | /admin/room-types                     | ADMIN         | 后台房型列表        |
 | 23 | GET  | /admin/rooms                          | ADMIN         | 后台房间列表        |
+| 24 | GET  | /reservations/search                  | RECEPTIONIST+ | 前台订单检索与待办列表  |
 
 
 
@@ -321,6 +322,8 @@
 返回订单字段 + `items`（排房后含 `roomId`/`roomNo`）。
 
 ### 5.3 我的订单 `GET /reservations/mine?page=1&size=10&status=`：分页返回当前会员订单，按创建时间倒序。
+
+### 5.5 前台订单检索 `GET /reservations/search?keyword=&status=&checkInDate=&page=1&size=20`（RECEPTIONIST / ADMIN）：按订单号、联系人、电话模糊检索，可按状态和入住日期过滤。
 
 ### 5.4 取消订单 `POST /reservations/{orderNo}/cancel`（MEMBER）
 

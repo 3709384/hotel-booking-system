@@ -13,6 +13,9 @@ const order = ref(null)
 const loadingOrder = ref(false)
 const assignmentRooms = reactive({})
 const floor = ref(8)
+const staffOrders = ref([])
+const loadingStaffOrders = ref(false)
+const staffOrderStatus = ref('CONFIRMED')
 const availableRooms = computed(() => board.value.filter((room) => room.status === 'VC'))
 
 async function loadBoard() {
@@ -25,6 +28,25 @@ async function loadBoard() {
   } finally {
     loadingBoard.value = false
   }
+}
+
+async function loadStaffOrders() {
+  loadingStaffOrders.value = true
+  try {
+    const response = await api.get('/reservations/search', {
+      params: { status: staffOrderStatus.value || undefined, page: 1, size: 30 },
+    })
+    staffOrders.value = response.data.records
+  } catch (error) {
+    ElMessage.error(error.message)
+  } finally {
+    loadingStaffOrders.value = false
+  }
+}
+
+async function openOrder(no) {
+  orderNo.value = no
+  await loadOrder()
 }
 
 async function loadOrder() {
@@ -63,7 +85,7 @@ async function checkIn() {
     const response = await api.post(`/pms/reservations/${order.value.orderNo}/check-in`, { assignments })
     order.value = response.data
     ElMessage.success('排房入住成功')
-    await loadBoard()
+    await Promise.all([loadBoard(), loadStaffOrders()])
   } catch (error) {
     ElMessage.error(error.message)
   }
@@ -77,7 +99,7 @@ async function checkOut() {
     const response = await api.post(`/pms/reservations/${order.value.orderNo}/check-out`)
     order.value = response.data
     ElMessage.success('退房完成')
-    await loadBoard()
+    await Promise.all([loadBoard(), loadStaffOrders()])
   } catch (error) {
     ElMessage.error(error.message)
   }
@@ -102,7 +124,7 @@ function roomStatusMeta(status) {
 }
 
 onMounted(async () => {
-  await loadBoard()
+  await Promise.all([loadBoard(), loadStaffOrders()])
   if (orderNo.value) await loadOrder()
 })
 </script>
@@ -117,6 +139,32 @@ onMounted(async () => {
     <section class="panel order-search">
       <div><h2 class="section-title">订单查询与办理</h2><p class="page-subtitle">输入订单号，核对订单后分配具体房间。</p></div>
       <div class="search-line"><el-input v-model="orderNo" placeholder="输入订单号" clearable @keyup.enter="loadOrder" /><el-button type="primary" :loading="loadingOrder" @click="loadOrder">查询订单</el-button></div>
+    </section>
+
+    <section class="panel staff-orders">
+      <div class="toolbar staff-order-toolbar">
+        <div>
+          <h2 class="section-title">订单列表</h2>
+          <p class="page-subtitle">直接选择待入住订单，无需手工复制订单号。</p>
+        </div>
+        <div class="staff-order-filter">
+          <el-select v-model="staffOrderStatus" @change="loadStaffOrders">
+            <el-option label="待入住" value="CONFIRMED" />
+            <el-option label="已入住" value="CHECKED_IN" />
+            <el-option label="待支付" value="PENDING_PAYMENT" />
+            <el-option label="全部状态" value="" />
+          </el-select>
+          <el-button :loading="loadingStaffOrders" @click="loadStaffOrders">刷新列表</el-button>
+        </div>
+      </div>
+      <el-table v-loading="loadingStaffOrders" :data="staffOrders">
+        <el-table-column prop="orderNo" label="订单号" min-width="190" />
+        <el-table-column prop="contactName" label="客人" width="110" />
+        <el-table-column label="入住日期" width="120"><template #default="{ row }">{{ row.checkInDate }}</template></el-table-column>
+        <el-table-column label="离店日期" width="120"><template #default="{ row }">{{ row.checkOutDate }}</template></el-table-column>
+        <el-table-column label="状态" width="100"><template #default="{ row }"><el-tag :type="orderStatusMeta(row.status).type">{{ orderStatusMeta(row.status).label }}</el-tag></template></el-table-column>
+        <el-table-column label="操作" width="100"><template #default="{ row }"><el-button link type="primary" @click="openOrder(row.orderNo)">办理</el-button></template></el-table-column>
+      </el-table>
     </section>
 
     <section v-if="order" class="panel order-workbench">
@@ -167,7 +215,9 @@ onMounted(async () => {
 .order-search { padding: 22px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .search-line { min-width: min(520px, 100%); }
 .search-line .el-input { flex: 1; }
-.order-workbench, .board-panel { margin-top: 22px; padding: 24px; }
+.order-workbench, .board-panel, .staff-orders { margin-top: 22px; padding: 24px; }
+.staff-order-toolbar { margin-bottom: 10px; }
+.staff-order-filter { display: flex; gap: 10px; }
 .order-head { margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; }
 .order-head h2 { margin: 5px 0 0; }
 .room-assignment-title { margin: 28px 0 15px; }

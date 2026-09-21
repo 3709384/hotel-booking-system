@@ -100,6 +100,11 @@ Assert-Success $frontLogin "receptionist login"
 $frontHeaders = @{ Authorization = "Bearer $($frontLogin.data.token)" }
 $board = Invoke-Json -Method Get -Uri "$BaseUrl/pms/rooms/board?floor=8" -Headers $frontHeaders
 Assert-Success $board "room board"
+$staffSearch = Invoke-Json -Method Get -Uri "$BaseUrl/reservations/search?status=CONFIRMED&page=1&size=20" -Headers $frontHeaders
+Assert-Success $staffSearch "staff reservation search"
+if (-not ($staffSearch.data.records | Where-Object { $_.orderNo -eq $orderNo })) {
+    throw "Created order was not returned by staff reservation search"
+}
 $room = $board.data | Where-Object {
     $_.roomTypeId -eq $selected.roomTypeId -and $_.status -eq "VC"
 } | Select-Object -First 1

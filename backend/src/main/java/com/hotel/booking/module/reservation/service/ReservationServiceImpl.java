@@ -152,6 +152,22 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public PageResult<ReservationVO> search(String keyword, String status, LocalDate checkInDate, long page, long size) {
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        LambdaQueryWrapper<Reservation> wrapper = new LambdaQueryWrapper<Reservation>()
+                .eq(status != null && !status.isBlank(), Reservation::getStatus, status)
+                .eq(checkInDate != null, Reservation::getCheckInDate, checkInDate)
+                .and(hasKeyword, w -> w.like(Reservation::getOrderNo, keyword)
+                        .or().like(Reservation::getContactName, keyword)
+                        .or().like(Reservation::getContactPhone, keyword))
+                .orderByAsc(Reservation::getCheckInDate)
+                .orderByDesc(Reservation::getCreatedAt);
+        Page<Reservation> result = reservationMapper.selectPage(new Page<>(page, size), wrapper);
+        List<ReservationVO> records = result.getRecords().stream().map(this::buildVO).toList();
+        return PageResult.of(records, result.getTotal(), page, size);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public ReservationVO cancel(String orderNo, Long userId) {
         Reservation order = requireByOrderNo(orderNo);
