@@ -1,4 +1,4 @@
-# 酒店客房预订系统 一键编排（nginx + app + mysql + redis）
+# 酒店客房预订系统 一键编排（frontend + app + mysql + redis）
 # 使用：cp .env.example .env（修改口令）后  docker compose up -d --build
 # 首次启动 MySQL 数据卷为空时，会自动执行挂载到 /docker-entrypoint-initdb.d 的 schema/seed 脚本。
 services:
@@ -51,13 +51,13 @@ services:
     expose:
       - "8080"
 
-  nginx:
-    image: nginx:stable
-    container_name: hotel-nginx
+  frontend:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    container_name: hotel-frontend
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
     restart: unless-stopped
