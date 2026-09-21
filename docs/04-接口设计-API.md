@@ -131,6 +131,8 @@
 | 19 | PUT  | /admin/room-types/{id}                | ADMIN         | 修改房型          |
 | 20 | POST | /admin/rooms                          | ADMIN         | 新增房间          |
 | 21 | POST | /admin/inventory/init                 | ADMIN         | 初始化 / 补齐日期库存  |
+| 22 | GET  | /admin/room-types                     | ADMIN         | 后台房型列表        |
+| 23 | GET  | /admin/rooms                          | ADMIN         | 后台房间列表        |
 
 
 
