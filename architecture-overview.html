@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="margin:0;padding:0;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>酒店客房预订系统 · 基础架构总览</title>
+<style>
+  :root{
+    --ink:#1f2d3d; --sub:#5b6b7c; --line:#dbe3ec; --bg:#eef2f7; --card:#ffffff;
+    --blue:#2563a8; --blue-bg:#eaf2fb; --navy:#1f3a5f;
+    --green:#1a9e6e; --green-bg:#e7f6ef; --orange:#d97706; --orange-bg:#fdf3e3;
+    --red:#dc2626; --red-bg:#fdecec; --gray-bg:#f1f4f8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif;font-size:14px;line-height:1.6;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+  header.top{background:linear-gradient(135deg,#1f3a5f,#2c5b8f);color:#fff;border-radius:14px;padding:26px 30px;margin-bottom:22px;}
+  header.top h1{margin:0 0 6px;font-size:24px;letter-spacing:.5px;}
+  header.top p{margin:0;color:#d7e4f2;font-size:13.5px;}
+  .meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;}
+  .meta span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:3px 12px;font-size:12px;}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(31,45,61,.05);}
+  h2{font-size:18px;margin:0 0 4px;color:var(--navy);display:flex;align-items:center;gap:9px;}
+  h2 .no{background:var(--navy);color:#fff;width:26px;height:26px;border-radius:7px;display:inline-flex;
+    align-items:center;justify-content:center;font-size:13px;flex:0 0 auto;}
+  .desc{color:var(--sub);font-size:13px;margin:2px 0 18px 35px;}
+  /* 分层架构 */
+  .layer{border:1.5px solid var(--line);border-radius:11px;margin:0 0 10px;overflow:hidden;}
+  .layer>.lhead{padding:8px 14px;font-weight:700;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;}
+  .layer>.lbody{padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;background:#fff;}
+  .l-client{background:var(--gray-bg);} .l-client .lhead{background:#e3e9f1;}
+  .l-nginx{background:var(--orange-bg);} .l-nginx .lhead{background:#f7e2c4;}
+  .l-app{background:var(--blue-bg);} .l-app .lhead{background:#d5e6f8;}
+  .l-common{background:#eef4f0;} .l-common .lhead{background:#dceee3;}
+  .l-data{background:var(--green-bg);} .l-data .lhead{background:#cfe9dc;}
+  .l-ext{background:var(--gray-bg);} .l-ext .lhead{background:#e3e9f1;}
+  .mod{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 11px;min-width:118px;flex:1 1 118px;}
+  .mod b{display:block;font-size:13px;color:var(--navy);} .mod small{color:var(--sub);font-size:11.5px;}
+  .mod.accent{border-color:#bcd6f2;background:#f6faff;}
+  .arrow{text-align:center;color:var(--sub);font-size:18px;margin:-4px 0 6px;}
+  .tag{display:inline-block;font-size:11px;border-radius:5px;padding:1px 7px;margin-left:6px;color:#fff;}
+  .tag.t-blue{background:var(--blue);} .tag.t-green{background:var(--green);} .tag.t-orange{background:var(--orange);}
+  /* 流程 */
+  .flow{display:flex;flex-direction:column;gap:0;}
+  .step{display:flex;gap:14px;align-items:stretch;}
+  .step .rail{display:flex;flex-direction:column;align-items:center;flex:0 0 38px;}
+  .dot{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 0 0 4px #eaf2fb;}
+  .bar{width:2px;flex:1;background:var(--line);min-height:18px;}
+  .card{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin-bottom:10px;background:#fff;}
+  .card b{color:var(--navy);} .card .why{color:var(--sub);font-size:12.5px;margin-top:2px;}
+  .branch{border-left:3px solid var(--red);background:var(--red-bg);border-radius:0 8px 8px 0;padding:8px 12px;margin:2px 0 10px 52px;font-size:12.5px;}
+  .tx{border-left:3px solid var(--green);background:var(--green-bg);border-radius:0 8px 8px 0;padding:8px 12px;margin:4px 0 0 52px;font-size:12.5px;}
+  code,.mono{font-family:Consolas,"Courier New",monospace;}
+  pre{background:#0f2235;color:#dce9f7;border-radius:9px;padding:14px 16px;font-size:12.5px;line-height:1.55;overflow-x:auto;margin:10px 0 0;}
+  pre .k{color:#7fc4ff;} pre .n{color:#ffcf8a;} pre .c{color:#8aa0b5;}
+  /* 状态机 */
+  .svgwrap{overflow-x:auto;}
+  svg{max-width:100%;height:auto;display:block;margin:0 auto;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--sub);margin-top:10px;}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+  /* ER */
+  .er-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px;}
+  .ent{border:1px solid var(--line);border-radius:9px;overflow:hidden;}
+  .ent .eh{padding:7px 12px;font-weight:700;font-size:13px;color:#fff;display:flex;justify-content:space-between;align-items:center;}
+  .ent.core .eh{background:var(--navy);} .ent.resv .eh{background:var(--blue);}
+  .ent.fut .eh{background:#8a97a5;}
+  .ent ul{list-style:none;margin:0;padding:6px 0;}
+  .ent li{padding:3px 12px;font-size:12px;color:#33475b;border-bottom:1px dashed #eef1f5;display:flex;justify-content:space-between;gap:8px;}
+  .ent li:last-child{border-bottom:none;}
+  .badge{font-size:10px;border-radius:4px;padding:0 5px;flex:0 0 auto;height:17px;line-height:17px;}
+  .b-pk{background:#fde7c4;color:#a85b00;} .b-fk{background:#d5e6f8;color:#1d5a96;} .b-uq{background:#dceee3;color:#177a52;}
+  .rels{margin-top:14px;font-size:12.5px;color:#33475b;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:6px 18px;}
+  .rels div{padding:4px 0;border-bottom:1px dotted #e3e9f1;}
+  /* 部署 */
+  .host{border:2px dashed #9fb4c9;border-radius:12px;padding:14px;background:#fafcfe;}
+  .host .ht{font-weight:700;color:var(--navy);margin-bottom:10px;font-size:13px;}
+  .svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+  .svc{border:1px solid var(--line);border-radius:9px;padding:10px;text-align:center;background:#fff;}
+  .svc .ic{font-size:20px;} .svc b{display:block;font-size:13px;color:var(--navy);margin:3px 0;} .svc small{color:var(--sub);}
+  .stack{display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0;}
+  .stack .down{color:var(--sub);font-size:16px;}
+  /* 技术栈 */
+  .tech{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .tech .t{border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:#fff;}
+  .tech .t b{color:var(--navy);font-size:13px;} .tech .t p{margin:2px 0 0;color:var(--sub);font-size:12px;}
+  .note{background:var(--orange-bg);border:1px solid #f0d6ac;border-radius:9px;padding:10px 14px;font-size:12.5px;color:#7a4d05;margin-top:14px;}
+  footer{color:var(--sub);font-size:12px;text-align:center;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>酒店客房预订系统 · 基础架构总览</h1>
+    <p>依据《软件产品文档入门手册》的文档方法论（BRD/PRD/SRS · HLD/LLD/DBD/API · 部署 · 测试）落地，为后续开发提供统一蓝图</p>
+    <div class="meta">
+      <span>Spring Boot 3.1 · JDK 17</span><span>MyBatis-Plus 3.5</span><span>MySQL 8.0</span>
+      <span>Redis（预留）</span><span>RESTful + JSON</span><span>Docker Compose</span><span>版本 v1.0 · 2026-09-21</span>
+    </div>
+  </header>
+
+  <!-- 1 分层架构 -->
+  <section>
+    <h2><span class="no">1</span>总体分层架构</h2>
+    <p class="desc">依赖只能自上而下；应用按业务能力分模块，模块边界即未来微服务拆分边界。</p>
+
+    <div class="layer l-client">
+      <div class="lhead">接入端 <span class="tag t-blue">Client</span></div>
+      <div class="lbody">
+        <div class="mod"><b>宾客预订端</b><small>H5 / 小程序（后续迭代）</small></div>
+        <div class="mod"><b>酒店管理后台 PMS</b><small>PC Web：前台 / 管理员</small></div>
+      </div>
+    </div>
+    <div class="arrow">▼ HTTPS</div>
+    <div class="layer l-nginx">
+      <div class="lhead">接入层 <span class="tag t-orange">Nginx</span></div>
+      <div class="lbody">
+        <div class="mod"><b>反向代理 / 负载均衡</b><small>转发 /api、托管静态资源、终结 TLS</small></div>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="layer l-app">
+      <div class="lhead">应用层 · Spring Boot 3 单体（按模块分包） <span class="tag t-blue">Business Modules</span></div>
+      <div class="lbody">
+        <div class="mod accent"><b>auth / user</b><small>注册登录 · 令牌 · RBAC</small></div>
+        <div class="mod accent"><b>room</b><small>房型 · 房间 · 房态</small></div>
+        <div class="mod accent"><b>availability</b><small>按夜可售量 · 计价</small></div>
+        <div class="mod accent"><b>reservation</b><small>建单 · 状态机 · 取消</small></div>
+        <div class="mod accent"><b>payment</b><small>支付 · 回调幂等 · 退款</small></div>
+        <div class="mod accent"><b>pms</b><small>排房 · 入住 · 退房 · 房态盘</small></div>
+        <div class="mod accent"><b>admin</b><small>资源管理 · 库存初始化</small></div>
+      </div>
+    </div>
+    <div class="arrow">▼ 仅通过 Service 接口调用，禁止跨模块直连 Mapper</div>
+    <div class="layer l-common">
+      <div class="lhead">公共支撑层 <span class="tag t-green">Common / Config / Security</span></div>
+      <div class="lbody">
+        <div class="mod"><b>统一返回 / 全局异常</b><small>Result · ResultCode</small></div>
+        <div class="mod"><b>JWT + RBAC 拦截器</b><small>@RequireRole</small></div>
+        <div class="mod"><b>声明式事务</b><small>@Transactional</small></div>
+        <div class="mod"><b>定时任务</b><small>超时取消 · No-show</small></div>
+      </div>
+    </div>
+    <div class="arrow">▼</div>
+    <div class="layer l-data">
+      <div class="lhead">数据层 <span class="tag t-green">Persistence</span></div>
+      <div class="lbody">
+        <div class="mod"><b>MySQL 8.0（InnoDB）</b><small>业务数据 + 房型×日期库存，强一致事务</small></div>
+        <div class="mod"><b>Redis 7（预留）</b><small>令牌 / 验证码 / 房型缓存 / 热点分布式锁</small></div>
+      </div>
+    </div>
+    <div class="arrow">▼ 网关接口 + Mock 实现（后续替换真实渠道）</div>
+    <div class="layer l-ext">
+      <div class="lhead">外部对接层（MVP 预留） <span class="tag t-orange">External</span></div>
+      <div class="lbody">
+        <div class="mod"><b>微信 / 支付宝</b><small>支付网关</small></div>
+        <div class="mod"><b>短信 / 消息</b><small>预订与入住通知</small></div>
+        <div class="mod"><b>对象存储 OSS</b><small>房型图片</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 核心机制：按夜库存与防超卖 -->
+  <section>
+    <h2><span class="no">2</span>核心机制：按“夜”库存与并发防超卖</h2>
+    <p class="desc">酒店客房按日期区间售卖，区别于普通电商“一件卖一次”。库存粒度为 <b>房型 × 日期 × 可售间数</b>。</p>
+    <div class="note">下单在<b>一个数据库事务</b>内，对区间内每个日期执行<b>条件更新</b>；任一夜不满足则整单回滚。正确性以数据库行锁 + 条件判断为准，Redis 锁仅作热点前置兜底。</div>
+<pre><span class="c">-- 条件扣减：仅当该夜剩余可售 ≥ 预订间数时才更新，受影响行数 0 即库存不足</span>
+<span class="k">UPDATE</span> room_inventory
+   <span class="k">SET</span> booked_count = booked_count + <span class="n">#{qty}</span>
+ <span class="k">WHERE</span> room_type_id = <span class="n">#{roomTypeId}</span>
+   <span class="k">AND</span> inventory_date = <span class="n">#{date}</span>
+   <span class="k">AND</span> total_count - booked_count &gt;= <span class="n">#{qty}</span>;
+
+<span class="c">-- 区间可售量取每夜最小值；库存行不齐直接判 0，避免漏判超卖</span>
+<span class="k">SELECT</span> <span class="k">MIN</span>(total_count - booked_count) <span class="k">FROM</span> room_inventory
+ <span class="k">WHERE</span> room_type_id=? <span class="k">AND</span> inventory_date &gt;= ? <span class="k">AND</span> inventory_date &lt; ?;</pre>
+  </section>
+
+  <!-- 3 预订主流程 -->
+  <section>
+    <h2><span class="no">3</span>在线预订主流程（含事务与回滚）</h2>
+    <p class="desc">半开区间 [入住日, 离店日) 计库存与计费，间夜数 = 离店 − 入住。</p>
+    <div class="flow">
+      <div class="step"><div class="rail"><div class="dot">1</div><div class="bar"></div></div>
+        <div class="card"><b>查询可用房型</b><div class="why">逐夜计算最小可售量与 N 晚总价，未登录可访问；任一夜为 0 则置灰“不可订”。</div></div></div>
+      <div class="step"><div class="rail"><div class="dot">2</div><div class="bar"></div></div>
+        <div class="card"><b>提交订单</b><div class="why">校验日期（离店&gt;入住）、房型在售、联系人；按“房型+间数”提交。</div></div></div>
+      <div class="branch">✕ 任一夜可售 &lt; 预订间数 → 返回 4002 库存不足，<b>整单回滚</b>，不产生订单与扣减。</div>
+      <div class="step"><div class="rail"><div class="dot">3</div><div class="bar"></div></div>
+        <div class="card"><b>事务内逐夜扣减库存</b><div class="why">对每个房型、区间内每一夜执行条件 UPDATE（见第 2 节）。</div></div></div>
+      <div class="tx">▣ 同一事务：生成订单（待支付，15 分钟过期）+ 一行一间展开明细，锁定下单时单价。</div>
+      <div class="step" style="margin-top:8px;"><div class="rail"><div class="dot">4</div><div class="bar"></div></div>
+        <div class="card"><b>限时支付（默认 15 分钟）</b><div class="why">支付回调做幂等（第三方交易号唯一）。</div></div></div>
+      <div class="branch">✕ 超时未支付 → 定时任务置“已取消”并逐夜释放库存；重复回调不重复确认。</div>
+      <div class="step"><div class="rail"><div class="dot">5</div><div class="bar"></div></div>
+        <div class="card"><b>支付成功 → 已确认</b><div class="why">订单 CONFIRMED，库存正式占用，记录支付流水。</div></div></div>
+      <div class="step"><div class="rail"><div class="dot">6</div><div class="bar"></div></div>
+        <div class="card"><b>前台排房并入住</b><div class="why">校验同房型、房间空闲 VC、区间无冲突；回填房间、房间置 OC、订单 CHECKED_IN。</div></div></div>
+      <div class="step"><div class="rail"><div class="dot">7</div><div class="bar" style="background:transparent;"></div></div>
+        <div class="card"><b>退房结账</b><div class="why">订单 COMPLETED，房间转 VD 待清洁；清洁合格回 VC 可再次售卖。</div></div></div>
+    </div>
+  </section>
+
+  <!-- 4 订单状态机 -->
+  <section>
+    <h2><span class="no">4</span>订单状态机</h2>
+    <p class="desc">非法跳转在 Service 层统一拦截（对应验收 AC-06）。</p>
+    <div class="svgwrap">
+      <svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="订单状态机示意图">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#5b6b7c"/>
+          </marker>
+        </defs>
+        <g font-family="Segoe UI,Microsoft YaHei" font-size="12.5" text-anchor="middle">
+          <rect x="40" y="40" width="150" height="56" rx="9" fill="#fdf3e3" stroke="#d97706" stroke-width="1.6"/>
+          <text x="115" y="64" font-weight="700" fill="#92590a">待支付</text><text x="115" y="83" fill="#a9784f" font-size="11">PENDING_PAYMENT</text>
+
+          <rect x="300" y="40" width="150" height="56" rx="9" fill="#eaf2fb" stroke="#2563a8" stroke-width="1.6"/>
+          <text x="375" y="64" font-weight="700" fill="#1d4e80">已确认</text><text x="375" y="83" fill="#5b7fa6" font-size="11">CONFIRMED</text>
+
+          <rect x="560" y="40" width="150" height="56" rx="9" fill="#e7f6ef" stroke="#1a9e6e" stroke-width="1.6"/>
+          <text x="635" y="64" font-weight="700" fill="#12704e">已入住</text><text x="635" y="83" fill="#4f9278" font-size="11">CHECKED_IN</text>
+
+          <rect x="820" y="40" width="150" height="56" rx="9" fill="#eef2f7" stroke="#64748b" stroke-width="1.6"/>
+          <text x="895" y="64" font-weight="700" fill="#33475b">已完成</text><text x="895" y="83" fill="#71809b" font-size="11">COMPLETED</text>
+
+          <rect x="40" y="270" width="150" height="52" rx="9" fill="#fdecec" stroke="#dc2626" stroke-width="1.6"/>
+          <text x="115" y="292" font-weight="700" fill="#a01d1d">已取消</text><text x="115" y="310" fill="#c06a6a" font-size="11">CANCELLED</text>
+
+          <rect x="300" y="270" width="150" height="52" rx="9" fill="#f1f4f8" stroke="#8a97a5" stroke-width="1.4"/>
+          <text x="375" y="292" font-weight="700" fill="#52606d">未到店</text><text x="375" y="310" fill="#8a97a5" font-size="11">NO_SHOW</text>
+
+          <rect x="555" y="270" width="180" height="52" rx="9" fill="#fdeee6" stroke="#d97706" stroke-width="1.4"/>
+          <text x="645" y="292" font-weight="700" fill="#9a5b16">退款中 / 已退款</text><text x="645" y="310" fill="#b4835a" font-size="10.5">REFUNDING / REFUNDED</text>
+        </g>
+        <g stroke="#5b6b7c" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+          <line x1="190" y1="68" x2="298" y2="68"/>
+          <line x1="450" y1="68" x2="558" y2="68"/>
+          <line x1="710" y1="68" x2="818" y2="68"/>
+          <line x1="115" y1="96" x2="115" y2="268"/>
+          <line x1="375" y1="96" x2="375" y2="268"/>
+          <path d="M335,96 C255,175 180,225 150,268"/>
+          <path d="M425,96 C505,175 580,225 620,268"/>
+        </g>
+        <g font-family="Segoe UI,Microsoft YaHei" font-size="11" fill="#425466">
+          <text x="244" y="58" text-anchor="middle">支付成功</text>
+          <text x="504" y="58" text-anchor="middle">排房入住</text>
+          <text x="764" y="58" text-anchor="middle">退房结账</text>
+          <text x="105" y="188" text-anchor="end">用户取消 / 超时</text>
+          <text x="385" y="188" text-anchor="start">过入住日未到</text>
+          <text x="232" y="212" text-anchor="middle">免费取消</text>
+          <text x="530" y="212" text-anchor="middle">申请退款</text>
+          <text x="645" y="348" text-anchor="middle" font-size="10.5" fill="#b4835a">退款成功后释放对应夜库存（独立终态）</text>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i style="background:#d97706;"></i>待处理</span>
+      <span><i style="background:#2563a8;"></i>已确认</span>
+      <span><i style="background:#1a9e6e;"></i>进行中</span>
+      <span><i style="background:#64748b;"></i>终态-完成</span>
+      <span><i style="background:#dc2626;"></i>终态-取消</span>
+    </div>
+  </section>
+
+  <!-- 5 ER 关系 -->
+  <section>
+    <h2><span class="no">5</span>数据模型（ER 关系，MySQL 8.0）</h2>
+    <p class="desc">采用逻辑外键 + 唯一索引 + 条件更新保证一致性；可售量不落冗余列。完整数据字典见 DBD。</p>
+    <div class="er-grid">
+      <div class="ent core"><div class="eh">user <span>用户</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>phone <span class="badge b-uq">UQ</span></li><li>password_hash / salt</li><li>role / status</li></ul></div>
+      <div class="ent core"><div class="eh">room_type <span>房型</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>code <span class="badge b-uq">UQ</span></li><li>name / bed_type</li><li>base_price / amenities</li></ul></div>
+      <div class="ent core"><div class="eh">room <span>物理房间</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>room_no <span class="badge b-uq">UQ</span></li><li>room_type_id <span class="badge b-fk">FK</span></li><li>status(VC/VD/OC/OOO)</li></ul></div>
+      <div class="ent resv"><div class="eh">room_inventory <span>每日库存</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>room_type_id <span class="badge b-fk">FK</span></li><li>inventory_date</li><li>total / booked <span class="badge b-uq">UQ(type,date)</span></li></ul></div>
+      <div class="ent resv"><div class="eh">reservation <span>订单主表</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>order_no <span class="badge b-uq">UQ</span></li><li>user_id <span class="badge b-fk">FK</span></li><li>check_in/out_date·nights</li><li>total_amount / status</li></ul></div>
+      <div class="ent resv"><div class="eh">reservation_item <span>订单明细</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>reservation_id <span class="badge b-fk">FK</span></li><li>room_type_id <span class="badge b-fk">FK</span></li><li>room_id（排房回填）<span class="badge b-fk">FK</span></li></ul></div>
+      <div class="ent resv"><div class="eh">payment <span>支付流水</span></div>
+        <ul><li>id <span class="badge b-pk">PK</span></li><li>payment_no <span class="badge b-uq">UQ</span></li><li>reservation_id <span class="badge b-fk">FK</span></li><li>transaction_id <span class="badge b-uq">UQ·幂等</span></li></ul></div>
+      <div class="ent fut"><div class="eh">review <span>评价·预留</span></div>
+        <ul><li>reservation_id <span class="badge b-uq">一单一评</span></li><li>score(1-5) / content</li></ul></div>
+      <div class="ent fut"><div class="eh">room_rate <span>日历房价·预留</span></div>
+        <ul><li>(room_type_id, rate_date) <span class="badge b-uq">UQ</span></li><li>price（动态定价）</li></ul></div>
+      <div class="ent fut"><div class="eh">notification_log <span>通知·预留</span></div>
+        <ul><li>type / channel / biz_no</li><li>status / send_time</li></ul></div>
+    </div>
+    <div class="rels">
+      <div>user <b>1 — N</b> reservation（一个会员多张订单）</div>
+      <div>room_type <b>1 — N</b> room（房型拥有多间物理房）</div>
+      <div>room_type <b>1 — N</b> room_inventory（每房型每天一条库存）</div>
+      <div>reservation <b>1 — N</b> reservation_item（一行=一间住 N 晚）</div>
+      <div>room_type <b>1 — N</b> reservation_item（被预订的房型）</div>
+      <div>room <b>1 — N</b> reservation_item（排房后分配，可空）</div>
+      <div>reservation <b>1 — N</b> payment（支付/退款流水）</div>
+      <div>user / room_type <b>1 — N</b> review（迭代）</div>
+    </div>
+  </section>
+
+  <!-- 6 部署拓扑 -->
+  <section>
+    <h2><span class="no">6</span>部署拓扑（Docker Compose 一键起）</h2>
+    <p class="desc">MVP 单机四容器；MySQL/Redis 不对公网暴露，应用无状态可水平扩容。</p>
+    <div class="host">
+      <div class="ht">☁ 单台云服务器（CentOS/Ubuntu + Docker）</div>
+      <div class="svc-grid">
+        <div class="svc"><div class="ic">🌐</div><b>nginx</b><small>80/443 · 反代 /api<br>TLS · 静态资源</small></div>
+        <div class="svc"><div class="ic">🧩</div><b>hotel-app</b><small>Spring Boot 内嵌 Tomcat<br>:8080（内网）</small></div>
+        <div class="svc"><div class="ic">🗄️</div><b>mysql:8.0</b><small>:3306 仅内网<br>数据卷 + 每日备份</small></div>
+        <div class="svc"><div class="ic">⚡</div><b>redis:7</b><small>:6379 仅内网<br>密码 · 预留</small></div>
+      </div>
+      <div class="stack"><span class="down">▲ 宾客 / 前台经互联网访问 nginx</span></div>
+      <div class="note">首次 <span class="mono">docker compose up</span> 时，MySQL 数据卷为空会自动执行 <span class="mono">schema.sql</span> 与 <span class="mono">seed.sql</span>；回滚切回上一镜像 tag，数据库变更遵循 Flyway“只增不破坏”。</div>
+    </div>
+  </section>
+
+  <!-- 7 技术栈 -->
+  <section>
+    <h2><span class="no">7</span>技术选型与工程纪律</h2>
+    <div class="tech">
+      <div class="t"><b>JDK 17 + Spring Boot 3.1</b><p>本机环境匹配，生态成熟，内嵌 Tomcat 开箱即用</p></div>
+      <div class="t"><b>MyBatis-Plus 3.5</b><p>单表零 SQL，复杂库存扣减写条件 UPDATE</p></div>
+      <div class="t"><b>MySQL 8 · InnoDB</b><p>行锁 + 本地事务保障并发一致性</p></div>
+      <div class="t"><b>RESTful + 统一 JSON</b><p>{code,message,data}，异常也统一返回</p></div>
+      <div class="t"><b>JWT + RBAC</b><p>无状态令牌，@RequireRole 接口级鉴权</p></div>
+      <div class="t"><b>Maven 锁定版本</b><p>精确版本号，避免“在我电脑上能跑”</p></div>
+      <div class="t"><b>分层 + DTO 隔离</b><p>Controller/Service/Mapper，敏感字段不外泄</p></div>
+      <div class="t"><b>前端（后续）</b><p>Vue3 + Vite + Element Plus（PMS）/ uni-app（C 端）</p></div>
+    </div>
+    <div class="note">文档纪律（手册核心原则）：需求 ↔ 设计 ↔ 代码 ↔ 测试双向可追溯；文档随代码版本化更新；小项目至少保证“需求文档、设计概要、测试用例”三类不缺失。</div>
+  </section>
+
+  <footer>酒店客房预订系统基础架构 v1.0 · 本图为架构示意图（示意），配套 PRD / HLD / DBD / API 文档与可编译后端骨架使用</footer>
+</div>
+</body>
+</html>

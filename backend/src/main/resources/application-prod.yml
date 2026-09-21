@@ -1,0 +1,43 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: hotel-booking
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 全部通过环境变量注入，不在代码库中固化口令（docker-compose 已提供默认服务名 mysql）
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/hotel_booking?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:hotel}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      # 生产环境保留默认 initializationFailTimeout=1：数据库不可用时应用启动失败，便于及时发现
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:please-set-a-strong-secret-in-production}
+    expire-seconds: 7200
+  order:
+    pay-timeout-minutes: 15
+    free-cancel-hour: 18
+  booking:
+    max-advance-days: 90
+
+logging:
+  level:
+    com.hotel.booking: info
+  file:
+    name: /app/logs/hotel-booking.log

@@ -1,0 +1,18 @@
+# Local runtime state
+.local/
+
+# Java build output
+backend/target/
+
+# Node build output
+frontend/node_modules/
+frontend/dist/
+
+# Local secrets and logs
+.env
+*.log
+
+# IDE files
+.idea/
+.vscode/
+*.iml

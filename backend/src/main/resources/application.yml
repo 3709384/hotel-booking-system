@@ -1,0 +1,47 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api          # 所有接口统一 /api 前缀，与 API 文档 Base URL 一致
+
+spring:
+  application:
+    name: hotel-booking
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 按本地环境修改账号密码；生产用环境变量覆盖（见 application-prod.yml）
+    url: jdbc:mysql://localhost:3306/hotel_booking?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 10000
+      # 开发期：数据库暂不可用也允许应用先启动（健康检查不依赖数据库）。
+      # 生产环境(prod)应移除该项或设为 1，做到"启动即校验数据库连通性"。
+      initialization-fail-timeout: -1
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true   # 下划线字段自动映射驼峰属性
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 开发期打印 SQL，生产关闭
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+
+# 业务自定义配置
+app:
+  jwt:
+    secret: "hotel-booking-dev-secret-key-please-change-in-prod-0123456789"
+    expire-seconds: 7200          # 令牌有效期 2 小时
+  order:
+    pay-timeout-minutes: 15       # 待支付订单保留时长（分钟）
+    free-cancel-hour: 18          # 免费取消时限：入住当日 18:00 前
+  booking:
+    max-advance-days: 90          # 最远可预订天数
+
+logging:
+  level:
+    com.hotel.booking: info
