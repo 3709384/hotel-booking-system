@@ -17,3 +17,10 @@ These local room images are sourced from the official Huazhu/H World brand pages
 - suite.jpg: All Seasons Hotel official brand page, guest room detail image.
   https://www.hworld.com/hotel/quanji
   https://ows-cdn.huazhu.com/ows-nofficial/sys/other/2024/03/15/20240315124151y5jgy3o2ozn4y08.jpg
+
+## Derived local variants
+
+- adv.jpg: local crop derived from the Hanting room photo used by std.jpg.
+- adt.jpg: local crop derived from the All Seasons room photo used by twn.jpg.
+- zpy.jpg: local crop derived from the All Seasons room photo used by dlx.jpg.
+- fam.jpg: local crop derived from the All Seasons room detail photo used by suite.jpg.

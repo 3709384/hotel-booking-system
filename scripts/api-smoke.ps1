@@ -39,6 +39,9 @@ $checkOut = (Get-Date).Date.AddDays($DaysAhead + 2).ToString("yyyy-MM-dd")
 Write-Host "[1/8] Public room types and availability"
 $types = Invoke-Json -Method Get -Uri "$BaseUrl/room-types?page=1&size=10"
 Assert-Success $types "room types"
+if ($types.data.total -lt 8) {
+    throw "Expected at least 8 room types, got $($types.data.total)"
+}
 $availability = Invoke-Json -Method Get -Uri "$BaseUrl/availability?checkIn=$checkIn&checkOut=$checkOut"
 Assert-Success $availability "availability"
 $selected = $availability.data | Sort-Object minAvailable -Descending | Select-Object -First 1
@@ -50,7 +53,7 @@ if (-not $selected.coverImage -or -not $selected.description) {
 }
 $reviews = Invoke-Json -Method Get -Uri "$BaseUrl/room-types/$($selected.roomTypeId)/reviews?page=1&size=10"
 Assert-Success $reviews "room type reviews"
-if ($reviews.data.total -lt 1) {
+if ($reviews.data.total -lt 4) {
     throw "Room type reviews were not seeded"
 }
 

@@ -27,10 +27,11 @@
 │   ├── 04-接口设计-API.md            #   统一约定/鉴权/错误码/26 个接口及请求响应示例
 │   ├── 05-非功能需求与部署方案.md     #   性能/并发一致/安全/可靠 NFR + Docker/手工部署 + Runbook
 │   ├── 06-开发路线与测试要点.md       #   M0-M5 里程碑/风险登记/正常·边界·异常测试用例（含并发防超卖）
-│   └── 07-个人学习路线与答辩清单.md    #   个人学习、练习、八周安排与答辩问题
+│   ├── 07-个人学习路线与答辩清单.md    #   个人学习、练习、八周安排与答辩问题
+│   └── 08-公开点评数据说明.md         #   点评来源、匿名化处理和本地用途
 ├── database/                        # —— 数据库脚本（MySQL 8.0，可重复执行）——
 │   ├── schema.sql                   #   建库建表（含 CREATE DATABASE，先 DROP 后 CREATE）
-│   └── seed.sql                     #   种子数据：3 账号 / 4 房型 / 12 房间 / 未来 90 天库存
+│   └── seed.sql                     #   种子数据：7 账号 / 8 房型 / 20 房间 / 32 条公开点评 / 未来 90 天库存
 ├── backend/                         # —— Spring Boot 3 后端（Maven Wrapper 已配置）——
 │   ├── mvnw  mvnw.cmd  pom.xml  Dockerfile
 │   └── src/main/...                 #   auth/user/room/reservation/payment/pms 模块
