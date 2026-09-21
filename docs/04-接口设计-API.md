@@ -134,6 +134,8 @@
 | 22 | GET  | /admin/room-types                     | ADMIN         | 后台房型列表        |
 | 23 | GET  | /admin/rooms                          | ADMIN         | 后台房间列表        |
 | 24 | GET  | /reservations/search                  | RECEPTIONIST+ | 前台订单检索与待办列表  |
+| 25 | GET  | /room-types/{id}/reviews              | 公开            | 房型历史评论列表       |
+| 26 | GET  | /room-types/{id}/reviews/summary      | 公开            | 房型评分聚合         |
 
 
 
@@ -250,7 +252,12 @@
 ]}
 ```
 
-任一夜无房则该房型 `minAvailable=0`，前端置灰 "不可订"。
+任一夜无房则该房型 `minAvailable=0`，前端置灰 "不可订"。响应同时包含房型简介、封面图片、平均评分和评论数量。
+
+### 4.4 房型评论
+
+* `GET /room-types/{id}/reviews?page=1&size=10`：分页返回公开评论，包含客户名称、评分、内容和日期。
+* `GET /room-types/{id}/reviews/summary`：返回平均评分与评论总数。
 
 
 

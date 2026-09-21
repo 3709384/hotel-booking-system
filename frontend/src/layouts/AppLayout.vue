@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
@@ -19,6 +19,12 @@ const navItems = computed(() => {
     items.push({ label: '后台管理', path: '/admin' })
   }
   return items
+})
+
+onMounted(() => {
+  if (auth.isLoggedIn) {
+    auth.refreshProfile().catch(() => auth.logout())
+  }
 })
 
 function logout() {

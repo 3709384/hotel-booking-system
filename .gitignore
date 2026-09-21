@@ -16,3 +16,6 @@ frontend/dist/
 .idea/
 .vscode/
 *.iml
+
+# Intermediate Huazhu source downloads
+frontend/public/images/rooms/hz-*

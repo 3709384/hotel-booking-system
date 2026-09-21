@@ -18,7 +18,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.hotel.booking.module.user.mapper",
         "com.hotel.booking.module.room.mapper",
         "com.hotel.booking.module.reservation.mapper",
-        "com.hotel.booking.module.payment.mapper"
+        "com.hotel.booking.module.payment.mapper",
+        "com.hotel.booking.module.review.mapper"
 })
 public class HotelBookingApplication {
 

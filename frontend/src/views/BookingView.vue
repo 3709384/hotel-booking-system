@@ -84,8 +84,19 @@ onMounted(loadRoom)
       </section>
 
       <aside class="panel summary-panel">
-        <div class="summary-cover"><span>{{ room?.code }}</span><strong>{{ room?.name }}</strong></div>
+        <div class="summary-cover">
+          <img :src="room?.coverImage || '/images/rooms/std.jpg'" :alt="room?.name" />
+          <div class="cover-overlay">
+            <span>{{ room?.code }}</span>
+            <strong>{{ room?.name }}</strong>
+            <div class="cover-rating">
+              <el-rate :model-value="Number(room?.averageScore || 0)" disabled allow-half />
+              <small>{{ room?.reviewCount || 0 }} 条评价</small>
+            </div>
+          </div>
+        </div>
         <div class="summary-body">
+          <div class="summary-row"><span>房型简介</span><strong class="summary-description">{{ room?.description }}</strong></div>
           <div class="summary-row"><span>床型</span><strong>{{ room?.bedType }}</strong></div>
           <div class="summary-row"><span>入住日期</span><strong>{{ checkIn }}</strong></div>
           <div class="summary-row"><span>离店日期</span><strong>{{ checkOut }}</strong></div>
@@ -104,9 +115,16 @@ onMounted(loadRoom)
 .form-panel, .summary-panel { padding: 26px; }
 .booking-form { max-width: 650px; margin-top: 24px; }
 .summary-panel { overflow: hidden; padding: 0; align-self: start; }
-.summary-cover { min-height: 150px; padding: 24px; display: flex; flex-direction: column; justify-content: flex-end; color: white; background: linear-gradient(140deg, #0d4f65, #27a5a7); }
+.summary-cover { position: relative; min-height: 210px; overflow: hidden; color: white; }
+.summary-cover img { width: 100%; height: 210px; display: block; object-fit: cover; }
+.cover-overlay { position: absolute; inset: 0; padding: 24px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.68)); }
 .summary-cover span { opacity: 0.72; font-size: 12px; letter-spacing: 0.16em; }
 .summary-cover strong { margin-top: 7px; font-size: 28px; }
+.cover-rating { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+.cover-rating :deep(.el-rate) { height: auto; }
+.cover-rating :deep(.el-rate__icon) { margin-right: 1px; font-size: 15px; }
+.cover-rating small { color: rgba(255,255,255,0.76); }
+.summary-description { max-width: 190px; font-size: 13px; line-height: 1.55; }
 .summary-body { padding: 22px; }
 .summary-row { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; color: var(--muted); border-bottom: 1px dashed var(--line); }
 .summary-row strong { color: var(--ink); text-align: right; }

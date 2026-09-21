@@ -79,6 +79,10 @@ public class RoomServiceImpl implements RoomService {
             vo.setCode(t.getCode());
             vo.setName(t.getName());
             vo.setBedType(t.getBedType());
+            vo.setMaxOccupancy(t.getMaxOccupancy());
+            vo.setArea(t.getArea());
+            vo.setDescription(t.getDescription());
+            vo.setCoverImage(t.getCoverImage());
             vo.setBasePrice(t.getBasePrice());
             vo.setNights(nights);
             vo.setMinAvailable(min);

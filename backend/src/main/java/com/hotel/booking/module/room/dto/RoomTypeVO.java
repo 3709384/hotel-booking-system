@@ -18,4 +18,6 @@ public class RoomTypeVO {
     private String description;
     private String coverImage;
     private List<String> amenities;
+    private BigDecimal averageScore;
+    private Long reviewCount;
 }

@@ -45,6 +45,14 @@ $selected = $availability.data | Sort-Object minAvailable -Descending | Select-O
 if ($null -eq $selected -or $selected.minAvailable -lt 1) {
     throw "No room inventory available for $checkIn to $checkOut"
 }
+if (-not $selected.coverImage -or -not $selected.description) {
+    throw "Room type image or description is missing"
+}
+$reviews = Invoke-Json -Method Get -Uri "$BaseUrl/room-types/$($selected.roomTypeId)/reviews?page=1&size=10"
+Assert-Success $reviews "room type reviews"
+if ($reviews.data.total -lt 1) {
+    throw "Room type reviews were not seeded"
+}
 
 Write-Host "[2/8] Member login"
 $memberLogin = Invoke-Json -Method Post -Uri "$BaseUrl/auth/login" -Body @{

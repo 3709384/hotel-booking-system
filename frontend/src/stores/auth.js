@@ -37,6 +37,12 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem(USER_KEY, JSON.stringify(this.user))
       return this.user
     },
+    async refreshProfile() {
+      if (!this.token) return
+      const response = await api.get('/auth/me')
+      this.user = { ...this.user, ...response.data }
+      localStorage.setItem(USER_KEY, JSON.stringify(this.user))
+    },
     logout() {
       this.token = null
       this.user = null

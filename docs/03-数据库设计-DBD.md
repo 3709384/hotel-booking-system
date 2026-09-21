@@ -215,8 +215,8 @@ erDiagram
 | transaction_id | VARCHAR(64) | 是 | NULL | 第三方交易号，**唯一，回调幂等** |
 | paid_at | DATETIME | 是 | NULL | 完成时间 |
 
-### 3.8 预留表（迭代，字段见 schema.sql）
-- **review 评价表**：`reservation_id` 唯一（一单一评）、`score(1-5)`、`content`、`images(JSON)`、`status`；
+### 3.8 评价表与预留表
+- **review 评价表**：用于房型平均评分和评论展示；`reservation_id` 唯一（一单一评）、`score(1-5)`、`content`、`images(JSON)`、`status`；
 - **room_rate 日历房价表**：`(room_type_id, rate_date)` 唯一、`price`，用于周末/节假日动态定价；
 - **notification_log 通知记录表**：`type/channel/title/content/biz_no/status/send_time`。
 
@@ -238,6 +238,7 @@ erDiagram
 | payment | uk_payment_no / uk_payment_transaction | 唯一 | 流水号唯一、第三方回调幂等 |
 | payment | idx_payment_reservation | 普通 | 按订单查流水 |
 | review | uk_review_reservation | 唯一 | 一单一评 |
+| review | idx_review_type_status | 普通 | 按房型和显示状态查询评论、统计评分 |
 | room_rate | uk_rate_type_date | 唯一 | 某房型某日房价唯一 |
 
 ## 5. 关键查询：区间可售量（对应 PRD BR-05/06）

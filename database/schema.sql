@@ -184,7 +184,7 @@ CREATE TABLE payment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付流水表';
 
 -- ---------------------------------------------------------------------
--- 8. 评价表 review（迭代功能, 本期仅建表预留）
+-- 8. 评价表 review（房型评分与历史评论展示）
 -- ---------------------------------------------------------------------
 CREATE TABLE review (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '评价ID',
@@ -199,8 +199,8 @@ CREATE TABLE review (
   updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_review_reservation (reservation_id),
-  KEY idx_review_type (room_type_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价表(迭代预留)';
+  KEY idx_review_type_status (room_type_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评价表';
 
 -- ---------------------------------------------------------------------
 -- 9. 日历房价表 room_rate（动态/周末/节假日房价, 迭代启用; MVP用room_type.base_price）
