@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api
 
@@ -27,6 +27,8 @@ mybatis-plus:
       id-type: auto
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://hotel-booking-web-3709384.onrender.com}
   jwt:
     secret: ${APP_JWT_SECRET:please-set-a-strong-secret-in-production}
     expire-seconds: 7200
