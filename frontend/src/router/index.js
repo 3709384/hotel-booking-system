@@ -18,9 +18,7 @@ const routes = [
     path: '/',
     component: () => import('../layouts/AppLayout.vue'),
     children: [
-      { path: '', redirect: '/hotels' },
-      { path: 'hotels', name: 'hotels', component: () => import('../views/HotelsView.vue') },
-      { path: 'hotels/:id', name: 'hotel-detail', component: () => import('../views/HotelDetailView.vue') },
+      { path: '', redirect: '/rooms' },
       { path: 'rooms', name: 'rooms', component: () => import('../views/RoomsView.vue') },
       {
         path: 'booking/:typeId',
@@ -53,7 +51,7 @@ const routes = [
       },
     ],
   },
-  { path: '/:pathMatch(.*)*', redirect: '/hotels' },
+  { path: '/:pathMatch(.*)*', redirect: '/rooms' },
 ]
 
 const router = createRouter({

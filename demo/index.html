@@ -3,150 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>郑州酒店预订 · 云栖住吧（全功能单文件演示）</title>
+<title>云栖酒店 · 预订系统（全功能单文件演示）</title>
 <style>
-  /* ===== 设计令牌（按 Boss 2026-10-29 提供的美团酒店列表参考图） =====
-     顶栏亮黄 #FFD100→#FFE45C / 白底列表 / 主文字近黑 #191919 / 次文字灰 #767676
-     价格红 #FA3E3E / 神券浅粉底 #FFF1F1 红字 / 评分黄底黑字药丸 / 扁平无阴影、细分割线 */
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F5F5; color:#191919; min-height:100vh; }
-  header { position:sticky; top:0; z-index:50; background:linear-gradient(180deg,#FFE45C,#FFD100); padding:10px 0 14px; }
-  .head-in { max-width:940px; margin:0 auto; padding:0 14px; }
-  .brand-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
-  .logo { font-size:19px; font-weight:900; color:#191919; }
-  .logo small { font-size:11px; font-weight:600; color:#5C4A00; margin-left:6px; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#8FC7DC; color:#173F52; min-height:100vh; }
+  a { color:#2F7EA3; text-decoration:none; }
+  header { position:sticky; top:0; z-index:50; background:rgba(255,255,255,.94); backdrop-filter:blur(6px); box-shadow:0 2px 14px rgba(47,126,163,.15); }
+  .head-in { max-width:1180px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .logo { font-size:20px; font-weight:800; color:#2F7EA3; }
+  .logo small { display:block; font-size:11px; font-weight:500; color:#7AA8BC; }
   nav { display:flex; gap:8px; flex-wrap:wrap; margin-left:auto; }
-  .nav-btn { border:none; background:rgba(255,255,255,.65); color:#191919; padding:6px 13px; border-radius:999px; font-size:13px; cursor:pointer; font-weight:700; }
-  .nav-btn.active { background:#191919; color:#FFD100; }
-  .user-box { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; }
-  .search-pill { background:#fff; border-radius:999px; display:flex; align-items:center; gap:10px; padding:8px 16px; flex-wrap:wrap; }
-  .city { font-size:17px; font-weight:800; white-space:nowrap; }
-  .dates { display:flex; align-items:center; gap:4px; border-left:1px solid #EEE; border-right:1px solid #EEE; padding:0 10px; }
-  .dates .dl { font-size:11px; color:#767676; line-height:1.25; text-align:center; }
-  .dates input { border:none; font-size:13px; font-weight:800; color:#F85A00; width:118px; background:transparent; font-family:inherit; }
-  .dates input:focus { outline:none; }
-  .kw { flex:1; min-width:130px; display:flex; align-items:center; gap:6px; color:#999; }
-  .kw input { border:none; font-size:15px; flex:1; background:transparent; font-family:inherit; color:#191919; }
-  .kw input:focus { outline:none; }
-  .search-go { border:none; background:#FFD100; color:#191919; font-weight:800; font-size:14px; border-radius:999px; padding:8px 18px; cursor:pointer; }
-  main { max-width:940px; margin:0 auto; padding:0 0 60px; }
-  .sheet { background:#fff; padding:6px 16px 20px; min-height:70vh; }
-  .sort-row { display:flex; gap:6px; align-items:center; padding:12px 0 4px; flex-wrap:wrap; }
-  .sort-row select { border:none; font-size:16px; font-weight:800; color:#191919; background:transparent; font-family:inherit; cursor:pointer; }
-  .sort-row select:focus { outline:none; }
-  .sort-note { margin-left:auto; font-size:12px; color:#999; }
-  .chip-row { display:flex; gap:8px; overflow-x:auto; padding:10px 0 4px; scrollbar-width:none; }
-  .chip-row::-webkit-scrollbar { display:none; }
-  .fchip { flex:none; border:none; background:#F5F5F5; color:#333; font-size:14px; padding:8px 14px; border-radius:8px; cursor:pointer; font-family:inherit; }
-  .fchip.on { background:#FFF3D6; color:#191919; font-weight:800; box-shadow:inset 0 0 0 2px #FFD100; }
-  .fchip .hot { color:#F5316E; font-weight:800; }
-  .fchip .gold { color:#B07D2B; font-weight:800; }
-  .points-bar { margin:12px 0 2px; background:#FFF6F3; border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:8px; font-size:14px; flex-wrap:wrap; }
-  .points-bar .coin { font-size:18px; }
-  .points-bar button { margin-left:auto; border:none; background:#FF4D2E; color:#fff; font-weight:800; font-size:14px; padding:8px 16px; border-radius:999px; cursor:pointer; }
-  .points-bar button.off { background:#191919; }
-  .hotel { display:flex; gap:14px; padding:18px 0; border-bottom:1px solid #F0F0F0; cursor:pointer; }
-  .cover { flex:none; width:150px; height:176px; border-radius:12px; position:relative; display:flex; align-items:center; justify-content:center; font-size:46px; color:#fff; overflow:hidden; }
-  .g1{background:linear-gradient(150deg,#8A6D3B,#D9A441)} .g2{background:linear-gradient(150deg,#274156,#4E7CA6)}
-  .g3{background:linear-gradient(150deg,#5B4A8A,#9A7BD0)} .g4{background:linear-gradient(150deg,#1F5F5B,#3FA796)}
-  .g5{background:linear-gradient(150deg,#8A2BE2,#4A2B8A)} .g6{background:linear-gradient(150deg,#37474F,#78909C)}
-  .cover .bdg { position:absolute; top:0; left:0; background:linear-gradient(90deg,#3A2E12,#6B5518); color:#FFE9A8; font-size:12px; font-weight:700; padding:4px 10px; border-radius:0 0 10px 0; }
-  .cover .play { position:absolute; right:8px; bottom:8px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,.45); color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; }
-  .h-body { flex:1; min-width:0; }
-  .h-name { font-size:19px; font-weight:900; line-height:1.35; }
-  .kind { display:inline-block; background:#F5F5F5; color:#767676; font-size:12px; border-radius:4px; padding:2px 6px; vertical-align:2px; margin-left:4px; font-weight:600; }
-  .score-row { display:flex; align-items:center; gap:7px; margin-top:7px; flex-wrap:wrap; }
-  .score { background:#FFD100; color:#191919; font-weight:900; font-size:15px; padding:2px 8px; border-radius:6px 6px 6px 0; }
-  .score-word { font-weight:900; font-size:15px; }
-  .quote { color:#767676; font-size:14px; }
-  .tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-  .tag { border:1px solid #E3E3E3; color:#333; font-size:12px; padding:3px 8px; border-radius:5px; }
-  .dist { color:#555; font-size:14px; margin-top:8px; }
-  .streak { color:#999; font-size:13px; margin-top:5px; }
-  .h-bottom { display:flex; align-items:flex-end; margin-top:6px; gap:10px; }
-  .sales { color:#999; font-size:13px; }
-  .price-box { margin-left:auto; text-align:right; }
-  .orig { color:#999; font-size:13px; text-decoration:line-through; margin-right:6px; }
-  .price { color:#FA3E3E; font-weight:900; font-size:26px; }
-  .price small { font-size:14px; font-weight:700; }
-  .qi { color:#191919; font-size:14px; font-weight:700; }
-  .promo { display:inline-block; margin-top:4px; background:#FFF1F1; color:#E93D3D; font-size:12px; font-weight:700; padding:3px 8px; border-radius:5px; }
-  .promo b { border-right:1px solid #F5C6C6; padding-right:6px; margin-right:6px; }
-  .card { background:#fff; border-radius:16px; padding:20px; margin:16px; border:1px solid #F0F0F0; }
-  main > .card:first-child { margin-top:16px; }
-  .card h2 { font-size:19px; font-weight:900; margin-bottom:12px; }
-  .card h3 { font-size:16px; font-weight:800; margin:16px 0 8px; }
-  .btn { display:inline-block; border:none; background:#FFD100; color:#191919; padding:10px 22px; border-radius:999px; font-size:15px; cursor:pointer; font-weight:800; font-family:inherit; }
-  .btn.red { background:#FA3E3E; color:#fff; }
-  .btn.light { background:#F5F5F5; color:#191919; }
-  .btn.danger { background:#fff; color:#FA3E3E; box-shadow:inset 0 0 0 2px #FA3E3E; }
-  .btn:disabled { background:#EDEDED; color:#AAA; cursor:not-allowed; box-shadow:none; }
+  .nav-btn { border:2px solid #BFE0EE; background:#fff; color:#2F7EA3; padding:7px 14px; border-radius:999px; font-size:14px; cursor:pointer; font-weight:600; }
+  .nav-btn.active { background:#E1F0F6; border-color:#4E9DBE; }
+  .user-box { display:flex; align-items:center; gap:8px; font-size:14px; }
+  main { max-width:1180px; margin:0 auto; padding:20px 16px 60px; }
+  .card { background:#fff; border-radius:24px; padding:22px; margin-bottom:18px; }
+  .card h2 { color:#2F7EA3; font-size:20px; margin-bottom:12px; }
+  .card h3 { color:#2F7EA3; font-size:16px; margin:14px 0 8px; }
+  .btn { display:inline-block; border:none; background:#3D8CAE; color:#fff; padding:10px 20px; border-radius:999px; font-size:15px; cursor:pointer; font-weight:600; }
+  .btn:hover { background:#2F7EA3; }
+  .btn:disabled { background:#B9D6E2; cursor:not-allowed; }
+  .btn.light { background:#E1F0F6; color:#2F7EA3; }
+  .btn.light:hover { background:#CFE8F2; }
+  .btn.danger { background:#E2703A; }
   .btn.small { padding:6px 14px; font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:18px; }
+  .room-card { background:#fff; border-radius:24px; overflow:hidden; display:flex; flex-direction:column; }
+  .room-cover { height:130px; display:flex; align-items:center; justify-content:center; font-size:54px; color:#fff; }
+  .g1{background:linear-gradient(135deg,#4E9DBE,#8FC7DC)} .g2{background:linear-gradient(135deg,#F2A65A,#E2703A)}
+  .g3{background:linear-gradient(135deg,#5B8C5A,#8FC7DC)} .g4{background:linear-gradient(135deg,#7C6AAE,#4E9DBE)}
+  .g5{background:linear-gradient(135deg,#C96F8E,#F2A65A)} .g6{background:linear-gradient(135deg,#2F7EA3,#5B8C5A)}
+  .room-body { padding:18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .room-body h3 { font-size:18px; color:#2F7EA3; }
+  .specs { font-size:13px; color:#5B7E8E; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { background:#EFF7FA; color:#2F7EA3; font-size:12px; padding:3px 10px; border-radius:999px; }
+  .price-row { margin-top:auto; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .price { font-size:24px; font-weight:800; color:#E2703A; }
+  .price small { font-size:13px; color:#5B7E8E; font-weight:500; }
   .badge { display:inline-block; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
-  .b-ok { background:#E7F6E9; color:#2E7D32; } .b-warn { background:#FFF3D6; color:#8F5E0E; }
-  .b-bad { background:#FDECEC; color:#C62828; } .b-info { background:#FFF3D6; color:#191919; }
-  .b-grey { background:#F0F0F0; color:#767676; }
-  .field { display:flex; flex-direction:column; gap:5px; font-size:13px; color:#767676; font-weight:700; }
-  .field input, .field select, .field textarea { border:1.5px solid #E8E8E8; border-radius:10px; padding:9px 12px; font-size:15px; color:#191919; background:#fff; font-family:inherit; }
-  .field input:focus, .field select:focus { outline:none; border-color:#FFD100; }
-  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; }
+  .b-ok { background:#E3F4E5; color:#357A38; } .b-warn { background:#FDF0DC; color:#A86A12; }
+  .b-bad { background:#FBE3E3; color:#B03A3A; } .b-info { background:#E1F0F6; color:#2F7EA3; }
+  .b-grey { background:#EDF1F3; color:#607B88; }
+  .search-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+  .field { display:flex; flex-direction:column; gap:5px; font-size:13px; color:#5B7E8E; font-weight:600; }
+  .field input, .field select, .field textarea { border:2px solid #D6EAF2; border-radius:12px; padding:9px 12px; font-size:15px; color:#173F52; background:#fff; font-family:inherit; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline:none; border-color:#4E9DBE; }
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
   table { width:100%; border-collapse:collapse; font-size:14px; }
-  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid #F0F0F0; vertical-align:top; }
-  th { color:#767676; font-size:13px; }
-  .order-card { border:1.5px solid #F0F0F0; border-radius:14px; padding:16px; margin-bottom:12px; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid #EAF3F7; vertical-align:top; }
+  th { color:#2F7EA3; font-size:13px; }
+  .order-card { border:2px solid #EAF3F7; border-radius:18px; padding:16px; margin-bottom:12px; }
   .order-head { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
-  .order-no { font-weight:800; }
-  .muted { color:#999; font-size:13px; }
-  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
-  .stat { background:#FFFBEB; border-radius:14px; padding:16px; text-align:center; }
-  .stat .num { font-size:26px; font-weight:900; }
-  .stat .lbl { font-size:13px; color:#767676; margin-top:4px; }
-  .board { display:grid; grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); gap:10px; }
-  .cell { border-radius:12px; padding:10px; text-align:center; cursor:pointer; }
-  .cell .no { font-weight:900; font-size:16px; }
+  .order-no { font-weight:700; color:#2F7EA3; }
+  .muted { color:#7AA8BC; font-size:13px; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .stat { background:#EFF7FA; border-radius:18px; padding:16px; text-align:center; }
+  .stat .num { font-size:28px; font-weight:800; color:#2F7EA3; }
+  .stat .lbl { font-size:13px; color:#5B7E8E; margin-top:4px; }
+  .board { display:grid; grid-template-columns:repeat(auto-fill,minmax(108px,1fr)); gap:10px; }
+  .cell { border-radius:14px; padding:10px; text-align:center; cursor:pointer; border:2px solid transparent; }
+  .cell .no { font-weight:800; font-size:16px; }
   .cell .st { font-size:12px; margin-top:2px; }
   .cell .tp { font-size:11px; opacity:.75; margin-top:2px; }
-  .st-VACANT { background:#E7F6E9; color:#2E6B31; } .st-OCCUPIED { background:#FDECEC; color:#93322F; }
-  .st-DIRTY { background:#FFF3D6; color:#8F5E0E; } .st-MAINTENANCE { background:#ECE7F5; color:#57468A; }
+  .st-VACANT { background:#E3F4E5; color:#2E6B31; } .st-OCCUPIED { background:#FBE3E3; color:#93322F; }
+  .st-DIRTY { background:#FDF0DC; color:#8F5E0E; } .st-MAINTENANCE { background:#E8E4F2; color:#57468A; }
   .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-  .tab { border:none; background:#F5F5F5; padding:7px 15px; border-radius:999px; cursor:pointer; font-size:14px; color:#333; font-weight:700; font-family:inherit; }
-  .tab.active { background:#191919; color:#FFD100; }
-  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:16px; }
+  .tab { border:2px solid #BFE0EE; background:#fff; padding:6px 14px; border-radius:999px; cursor:pointer; font-size:14px; color:#2F7EA3; font-weight:600; }
+  .tab.active { background:#E1F0F6; border-color:#4E9DBE; }
+  .modal-mask { position:fixed; inset:0; background:rgba(23,63,82,.45); display:none; align-items:center; justify-content:center; z-index:100; padding:16px; }
   .modal-mask.show { display:flex; }
-  .modal { background:#fff; border-radius:18px; padding:24px; max-width:520px; width:100%; max-height:88vh; overflow:auto; }
-  .modal h3 { margin-bottom:14px; font-size:18px; font-weight:900; }
-  #toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#191919; color:#fff; padding:12px 22px; border-radius:999px; font-size:15px; opacity:0; pointer-events:none; transition:.25s; z-index:200; max-width:90vw; text-align:center; }
+  .modal { background:#fff; border-radius:24px; padding:24px; max-width:520px; width:100%; max-height:88vh; overflow:auto; }
+  .modal h3 { color:#2F7EA3; margin-bottom:14px; font-size:18px; }
+  #toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px); background:#173F52; color:#fff; padding:12px 22px; border-radius:999px; font-size:15px; opacity:0; pointer-events:none; transition:.25s; z-index:200; max-width:90vw; text-align:center; }
   .timeline { display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-size:13px; margin:10px 0; }
-  .tl-dot { background:#F0F0F0; color:#767676; border-radius:999px; padding:4px 12px; font-weight:700; }
-  .tl-dot.on { background:#FFD100; color:#191919; }
-  .tl-arrow { color:#CCC; }
-  .review { border-bottom:1px solid #F0F0F0; padding:10px 0; }
-  .stars { color:#FA9E3E; letter-spacing:2px; }
-  .room-row { display:flex; gap:12px; align-items:center; border:1.5px solid #F0F0F0; border-radius:14px; padding:14px; margin-bottom:10px; flex-wrap:wrap; }
-  .room-row .rr-main { flex:1; min-width:200px; }
-  .note { background:#FFFBEB; border-radius:12px; padding:12px 14px; font-size:13px; color:#7A5A17; margin:14px 16px 0; line-height:1.6; }
-  .kv { display:grid; grid-template-columns:110px 1fr; gap:6px 12px; font-size:14px; }
-  .kv dt { color:#999; } .kv dd { font-weight:700; }
-  .auth-wrap { max-width:440px; margin:24px auto; }
+  .tl-dot { background:#EDF1F3; color:#607B88; border-radius:999px; padding:4px 12px; font-weight:600; }
+  .tl-dot.on { background:#3D8CAE; color:#fff; }
+  .tl-arrow { color:#B9D6E2; }
+  .review { border-bottom:1px solid #EAF3F7; padding:10px 0; }
+  .stars { color:#F2A65A; letter-spacing:2px; }
+  .auth-wrap { max-width:440px; margin:30px auto; }
   .quick { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  @media (max-width:640px){
-    .cover { width:112px; height:150px; font-size:36px; }
-    .h-name { font-size:16px; } .price { font-size:22px; }
-    .dates input { width:104px; }
-    .card { margin:12px 10px; padding:16px; }
-  }
+  .note { background:#FDF6E9; border-radius:14px; padding:12px 14px; font-size:13px; color:#7A5A17; margin-bottom:14px; line-height:1.6; }
+  .kv { display:grid; grid-template-columns:110px 1fr; gap:6px 12px; font-size:14px; }
+  .kv dt { color:#7AA8BC; } .kv dd { font-weight:600; }
+  @media (max-width:640px){ .room-cover{height:100px} .card{padding:16px} }
 </style>
 </head>
 <body>
 <header>
   <div class="head-in">
-    <div class="brand-row">
-      <div class="logo">云栖住吧<small>郑州酒店预订 · 全功能演示</small></div>
-      <nav id="nav"></nav>
-      <div class="user-box" id="userBox"></div>
-    </div>
-    <div class="search-pill" id="searchPill"></div>
+    <div class="logo">🏨 云栖酒店<small>预订系统 · 全功能单文件演示版</small></div>
+    <nav id="nav"></nav>
+    <div class="user-box" id="userBox"></div>
   </div>
 </header>
 <main id="app"></main>
@@ -158,7 +108,6 @@
 /* ============ 工具 ============ */
 const $ = s => document.querySelector(s);
 const todayStr = (offset=0) => { const d=new Date(); d.setDate(d.getDate()+offset); return d.toISOString().slice(0,10); };
-const mdStr = iso => iso ? iso.slice(5).replace("-",".") : "";
 const nightsBetween = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
 const nightList = (a,b) => { const r=[]; let d=new Date(a); const end=new Date(b); while(d<end){ r.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1);} return r; };
 const money = n => "¥" + Number(n).toLocaleString("zh-CN");
@@ -169,125 +118,69 @@ function openModal(html){ $("#modalBox").innerHTML=html; $("#modalMask").classLi
 function closeModal(){ $("#modalMask").classList.remove("show"); }
 $("#modalMask").addEventListener("click", e=>{ if(e.target.id==="modalMask") closeModal(); });
 
-/* ============ 种子数据 v2：郑州多酒店（风格与名称按参考图，价格/点评为演示数据） ============ */
-const PAY_MINUTES = 15;
-const POINTS = 2600, POINTS_YUAN = 26; // 100积分抵¥1，演示账号有 2600 积分
+/* ============ 种子数据（与仓库 seed.sql 同结构：用户/房型/房间/订单/支付/点评） ============ */
+const PAY_MINUTES = 15; // 待支付订单超时分钟数，对应后端 OrderTimeoutJob
 function seedData(){
   const users = [
-    { id:"u-admin", username:"admin", password:"admin123", name:"平台管理员", phone:"13800000001", role:"ADMIN" },
+    { id:"u-admin", username:"admin", password:"admin123", name:"系统管理员", phone:"13800000001", role:"ADMIN" },
     { id:"u-staff", username:"staff", password:"staff123", name:"前台小张", phone:"13800000002", role:"STAFF" },
     { id:"u-guest", username:"guest", password:"user123", name:"演示客人", phone:"13800000003", role:"USER" },
     { id:"u-li", username:"liwei", password:"user123", name:"李伟", phone:"13911112222", role:"USER" },
     { id:"u-wang", username:"wangfang", password:"user123", name:"王芳", phone:"13733334444", role:"USER" }
   ];
-  const hotels = [
-    { id:"h1", name:"明天假日酒店(郑州白庙地铁站店)", kind:"经济型", score:4.9, scoreWord:"超棒", quote:"尤其是投影特别给力",
-      tags:["住就送·20元券包","影音酒店","新开业/装修"], distanceKm:1.7, distanceText:"距您驾车1.7公里 · 约8分钟 · 近白庙地铁站",
-      landmark:"白庙地铁站", streak:64, sales:"1万+消费", badge:"优美会", grade:"g1", icon:"🏨",
-      promo:{ type:"神券", text:"立减294" }, member:false,
-      rooms:[
-        { id:"h1r1", name:"影院大床房", price:156, origPrice:450, totalRooms:5, capacity:2, area:28, bed:"1.8m 大床", amenities:["投影","免费WiFi","空调"] },
-        { id:"h1r2", name:"舒适双床房", price:172, origPrice:480, totalRooms:4, capacity:2, area:30, bed:"1.2m 双床", amenities:["免费WiFi","空调","电视"] },
-        { id:"h1r3", name:"豪华大床房", price:219, origPrice:560, totalRooms:3, capacity:2, area:36, bed:"1.8m 大床", amenities:["浴缸","投影","迷你吧"] }
-      ]},
-    { id:"h2", name:"松果酒店(郑州文化路白庙地铁站店)", kind:"经济型", score:4.9, scoreWord:"超棒", quote:"走廊艺术品陈设雅趣",
-      tags:["住就送·20元券包","外卖友好","免费停车场"], distanceKm:0.4, distanceText:"距您步行400米 · 约5分钟 · 近白庙地铁站",
-      landmark:"白庙地铁站", streak:254, sales:"最近的店", badge:"优美会", grade:"g2", icon:"🌲",
-      promo:{ type:"会员", text:"黄金会员8.5折 | 秋日特惠 | 立减104" }, member:true,
-      rooms:[
-        { id:"h2r1", name:"标准大床房", price:156, origPrice:260, totalRooms:6, capacity:2, area:26, bed:"1.8m 大床", amenities:["免费WiFi","空调"] },
-        { id:"h2r2", name:"艺术双床房", price:169, origPrice:288, totalRooms:4, capacity:2, area:30, bed:"1.2m 双床", amenities:["免费WiFi","电视"] },
-        { id:"h2r3", name:"亲子家庭房", price:236, origPrice:399, totalRooms:2, capacity:3, area:42, bed:"大床+单人床", amenities:["儿童用品","免费停车场"] }
-      ]},
-    { id:"h3", name:"仟陌·境瑶酒店(郑州东风路正弘城店)", kind:"舒适型", score:5.0, scoreWord:"超棒", quote:"视野非常开阔投影仪很大",
-      tags:["住就送·20元券包","影音酒店","新开业/装修"], distanceKm:1.8, distanceText:"距您驾车1.8公里 · 约8分钟",
-      landmark:"正弘城", streak:null, sales:"1万+消费", badge:"美团住吧", grade:"g3", icon:"🎬", rankNote:"农业路影音人气榜第2名",
-      promo:{ type:"神券", text:"立减344" }, member:false,
-      rooms:[
-        { id:"h3r1", name:"境瑶影院大床房", price:180, origPrice:524, totalRooms:4, capacity:2, area:38, bed:"1.8m 大床", amenities:["巨幕投影","免费WiFi","浴缸"] },
-        { id:"h3r2", name:"开阔景观双床房", price:208, origPrice:560, totalRooms:3, capacity:2, area:40, bed:"1.2m 双床", amenities:["落地窗","投影"] },
-        { id:"h3r3", name:"境瑶套房", price:329, origPrice:799, totalRooms:2, capacity:3, area:66, bed:"2m 大床", amenities:["客厅","浴缸","迷你吧"] }
-      ]},
-    { id:"h4", name:"云季·智慧酒店(郑州东风路正弘城店)", kind:"舒适型", score:5.0, scoreWord:"超棒", quote:"30楼有免费洗衣机",
-      tags:["住就送·20元券包","影音酒店","新开业/装修"], distanceKm:1.7, distanceText:"距您驾车1.7公里 · 约8分钟 · 近白庙地铁站",
-      landmark:"正弘城", streak:199, sales:"8千+消费", badge:"美团住吧", grade:"g4", icon:"☁️",
-      promo:{ type:"神券", text:"立减243" }, member:true,
-      rooms:[
-        { id:"h4r1", name:"智慧大床房", price:177, origPrice:420, totalRooms:5, capacity:2, area:32, bed:"1.8m 大床", amenities:["智能客控","投影","免费洗衣"] },
-        { id:"h4r2", name:"云端双床房", price:196, origPrice:460, totalRooms:3, capacity:2, area:34, bed:"1.2m 双床", amenities:["高楼层","智能客控"] },
-        { id:"h4r3", name:"行政大床房", price:288, origPrice:680, totalRooms:2, capacity:2, area:48, bed:"2m 大床", amenities:["行政礼遇","浴缸"] }
-      ]},
-    { id:"h5", name:"栖迟·电竞酒店(郑州二七广场店)", kind:"舒适型", score:4.8, scoreWord:"很好", quote:"电竞椅配2K屏，打游戏太爽了",
-      tags:["电竞酒店","神券商家","外卖友好"], distanceKm:0.3, distanceText:"距您步行300米 · 约4分钟 · 二七广场旁",
-      landmark:"二七广场", streak:87, sales:"6千+消费", badge:"优美会", grade:"g5", icon:"🎮",
-      promo:{ type:"神券", text:"立减160" }, member:false,
-      rooms:[
-        { id:"h5r1", name:"电竞大床房", price:139, origPrice:299, totalRooms:4, capacity:2, area:30, bed:"1.8m 大床", amenities:["RTX电竞电脑","电竞椅","2K显示器"] },
-        { id:"h5r2", name:"双人电竞房", price:199, origPrice:420, totalRooms:3, capacity:2, area:38, bed:"1.2m 双床", amenities:["双电竞位","2K显示器"] },
-        { id:"h5r3", name:"四人开黑房", price:299, origPrice:650, totalRooms:2, capacity:4, area:55, bed:"双大床", amenities:["四电竞位","客厅"] }
-      ]},
-    { id:"h6", name:"全季酒店(郑州郑东新区CBD店)", kind:"高档型", score:4.9, scoreWord:"超棒", quote:"大堂茶香很治愈，床品一如既往稳",
-      tags:["住就送·20元券包","免费停车场","健身房"], distanceKm:6.2, distanceText:"距您驾车6.2公里 · 约18分钟 · 会展中心旁",
-      landmark:"郑东新区CBD", streak:312, sales:"2万+消费", badge:"优美会", grade:"g6", icon:"🍵",
-      promo:{ type:"会员", text:"黄金会员9折 | 立减68" }, member:true,
-      rooms:[
-        { id:"h6r1", name:"高级大床房", price:268, origPrice:336, totalRooms:6, capacity:2, area:35, bed:"1.8m 大床", amenities:["免费WiFi","健身房"] },
-        { id:"h6r2", name:"商务双床房", price:288, origPrice:368, totalRooms:4, capacity:2, area:38, bed:"1.2m 双床", amenities:["办公桌","免费停车场"] },
-        { id:"h6r3", name:"豪华套房", price:468, origPrice:599, totalRooms:2, capacity:3, area:70, bed:"2m 大床", amenities:["客厅","浴缸","茶具"] }
-      ]}
+  const roomTypes = [
+    { id:"rt1", name:"标准双床房", price:299, totalRooms:6, capacity:2, area:32, bed:"1.2m 双床", grade:"g1", icon:"🛏️", amenities:["免费WiFi","空调","电视","独立卫浴"], desc:"温馨实用，适合朋友结伴或出差双人入住。", active:true },
+    { id:"rt2", name:"豪华大床房", price:399, totalRooms:5, capacity:2, area:38, bed:"1.8m 大床", grade:"g2", icon:"🛎️", amenities:["免费WiFi","空调","浴缸","迷你吧"], desc:"落地窗采光，带浴缸，情侣和商务客人的热门选择。", active:true },
+    { id:"rt3", name:"商务大床房", price:459, totalRooms:4, capacity:2, area:42, bed:"1.8m 大床", grade:"g3", icon:"💼", amenities:["办公桌","免费WiFi","咖啡机","洗衣服务"], desc:"安静楼层 + 独立办公区，出差办公不将就。", active:true },
+    { id:"rt4", name:"海景大床房", price:699, totalRooms:3, capacity:2, area:45, bed:"1.8m 大床", grade:"g6", icon:"🌊", amenities:["海景阳台","浴缸","早餐","迷你吧"], desc:"推窗见海，含双早，度假首选。", active:true },
+    { id:"rt5", name:"家庭套房", price:599, totalRooms:3, capacity:4, area:68, bed:"大床+双床", grade:"g4", icon:"👨‍👩‍👧", amenities:["客厅","双卫浴","儿童用品","早餐"], desc:"一厅一卧，全家出游空间管够。", active:true },
+    { id:"rt6", name:"行政套房", price:899, totalRooms:2, capacity:3, area:88, bed:"2m 大床", grade:"g5", icon:"👑", amenities:["行政酒廊","会客区","浴缸","管家服务"], desc:"顶层套房，含行政酒廊权益，接待贵宾有面子。", active:true }
   ];
-  const roomTypes = [];
-  hotels.forEach(h => h.rooms.forEach(r => roomTypes.push({ ...r, hotelId: h.id, active: true })));
   const rooms = [];
+  const floors = { rt1:2, rt2:3, rt3:5, rt4:6, rt5:7, rt6:8 };
   roomTypes.forEach(rt=>{
     for(let i=1;i<=rt.totalRooms;i++){
-      rooms.push({ id:"room-"+rt.id+"-"+i, roomTypeId:rt.id, number: (hotels.findIndex(h=>h.id===rt.hotelId)+2)*100 + i*1 + (parseInt(rt.id.replace(/\D/g,""))%3)*0, status:"VACANT" });
+      rooms.push({ id:"room-"+rt.id+"-"+i, roomTypeId:rt.id, number: floors[rt.id]*100 + i, status:"VACANT" });
     }
   });
-  // 房间号按酒店分组重排，避免重复：酒店序号*1000 + 房型序号*100 + 序号
-  rooms.length = 0;
-  hotels.forEach((h,hi)=> h.rooms.forEach((r,ri)=>{
-    for(let i=1;i<=r.totalRooms;i++) rooms.push({ id:"room-"+r.id+"-"+i, roomTypeId:r.id, number:(hi+1)*1000 + (ri+1)*100 + i, status:"VACANT" });
-  }));
-  rooms.find(r=>r.id==="room-h3r1-1").status = "OCCUPIED";
-  rooms.find(r=>r.id==="room-h1r1-2").status = "DIRTY";
-  rooms.find(r=>r.id==="room-h2r1-1").status = "MAINTENANCE";
+  rooms.find(r=>r.id==="room-rt4-1").status = "OCCUPIED"; // 与种子订单 r-seed-4 的已入住房间对应（601 房）
+  rooms.find(r=>r.number===202).status = "DIRTY";
+  rooms.find(r=>r.number===501).status = "MAINTENANCE";
   const now = Date.now();
   const reservations = [
     { id:"r-seed-1", orderNo:"HB20261029001", userId:"u-guest", guestName:"演示客人", guestPhone:"13800000003",
-      items:[{ roomTypeId:"h2r1", rooms:1, price:156 }], checkIn:todayStr(0), checkOut:todayStr(2), totalAmount:312,
-      status:"PAID", createdAt:now-3600e3, paidAt:now-3500e3, assignedRoomId:null, remark:"尽量高楼层" },
+      items:[{ roomTypeId:"rt2", rooms:1, price:399 }], checkIn:todayStr(0), checkOut:todayStr(2), totalAmount:798,
+      status:"PAID", createdAt:now-3600e3, paidAt:now-3500e3, assignedRoomId:null, remark:"高楼层，安静一点" },
     { id:"r-seed-2", orderNo:"HB20261029002", userId:"u-guest", guestName:"演示客人", guestPhone:"13800000003",
-      items:[{ roomTypeId:"h1r1", rooms:1, price:156 }], checkIn:todayStr(3), checkOut:todayStr(4), totalAmount:156,
+      items:[{ roomTypeId:"rt1", rooms:1, price:299 }], checkIn:todayStr(3), checkOut:todayStr(4), totalAmount:299,
       status:"UNPAID", createdAt:now-120e3, paidAt:null, assignedRoomId:null, remark:"" },
     { id:"r-seed-3", orderNo:"HB20261020003", userId:"u-guest", guestName:"演示客人", guestPhone:"13800000003",
-      items:[{ roomTypeId:"h4r1", rooms:1, price:177 }], checkIn:todayStr(-6), checkOut:todayStr(-4), totalAmount:354,
-      status:"COMPLETED", createdAt:now-7*86400e3, paidAt:now-7*86400e3, assignedRoomId:"room-h4r1-1", remark:"" },
+      items:[{ roomTypeId:"rt4", rooms:1, price:699 }], checkIn:todayStr(-6), checkOut:todayStr(-4), totalAmount:1398,
+      status:"COMPLETED", createdAt:now-7*86400e3, paidAt:now-7*86400e3, assignedRoomId:"room-rt4-2", remark:"" },
     { id:"r-seed-4", orderNo:"HB20261029004", userId:"u-wang", guestName:"王芳", guestPhone:"13733334444",
-      items:[{ roomTypeId:"h3r1", rooms:1, price:180 }], checkIn:todayStr(-1), checkOut:todayStr(1), totalAmount:360,
-      status:"CHECKED_IN", createdAt:now-2*86400e3, paidAt:now-2*86400e3, assignedRoomId:"room-h3r1-1", remark:"" },
+      items:[{ roomTypeId:"rt4", rooms:1, price:699 }], checkIn:todayStr(-1), checkOut:todayStr(1), totalAmount:1398,
+      status:"CHECKED_IN", createdAt:now-2*86400e3, paidAt:now-2*86400e3, assignedRoomId:"room-rt4-1", remark:"" },
     { id:"r-seed-5", orderNo:"HB20261029005", userId:"u-li", guestName:"李伟", guestPhone:"13911112222",
-      items:[{ roomTypeId:"h1r1", rooms:2, price:156 }], checkIn:todayStr(0), checkOut:todayStr(1), totalAmount:312,
+      items:[{ roomTypeId:"rt1", rooms:2, price:299 }], checkIn:todayStr(0), checkOut:todayStr(1), totalAmount:598,
       status:"PAID", createdAt:now-5*3600e3, paidAt:now-5*3600e3, assignedRoomId:null, remark:"两间尽量挨着" }
   ];
   const payments = [
-    { id:"p1", reservationId:"r-seed-1", amount:312, method:"微信支付", status:"SUCCESS", tradeNo:"WX"+now, paidAt:now-3500e3 },
-    { id:"p2", reservationId:"r-seed-3", amount:354, method:"支付宝", status:"SUCCESS", tradeNo:"ALI"+(now-7*86400e3), paidAt:now-7*86400e3 },
-    { id:"p3", reservationId:"r-seed-4", amount:360, method:"微信支付", status:"SUCCESS", tradeNo:"WX"+(now-2*86400e3), paidAt:now-2*86400e3 },
-    { id:"p4", reservationId:"r-seed-5", amount:312, method:"银行卡", status:"SUCCESS", tradeNo:"CARD"+(now-5*3600e3), paidAt:now-5*3600e3 }
+    { id:"p1", reservationId:"r-seed-1", amount:798, method:"微信支付", status:"SUCCESS", tradeNo:"WX"+now, paidAt:now-3500e3 },
+    { id:"p2", reservationId:"r-seed-3", amount:1398, method:"支付宝", status:"SUCCESS", tradeNo:"ALI"+(now-7*86400e3), paidAt:now-7*86400e3 },
+    { id:"p3", reservationId:"r-seed-4", amount:1398, method:"微信支付", status:"SUCCESS", tradeNo:"WX"+(now-2*86400e3), paidAt:now-2*86400e3 },
+    { id:"p4", reservationId:"r-seed-5", amount:598, method:"银行卡", status:"SUCCESS", tradeNo:"CARD"+(now-5*3600e3), paidAt:now-5*3600e3 }
   ];
   const reviews = [
-    { id:"rev1", hotelId:"h4", roomTypeId:"h4r1", userId:"u-guest", userName:"演示客人", rating:5, content:"30楼有免费洗衣机，智能客控很方便，下次还住。", date:todayStr(-3), reservationId:"r-seed-3" },
-    { id:"rev2", hotelId:"h1", roomTypeId:"h1r1", userId:"u-li", userName:"李伟", rating:5, content:"投影特别给力，晚上看电影氛围拉满。", date:todayStr(-9), reservationId:null },
-    { id:"rev3", hotelId:"h2", roomTypeId:"h2r1", userId:"u-wang", userName:"王芳", rating:5, content:"离地铁站步行几分钟，走廊的艺术品很有意思。", date:todayStr(-12), reservationId:null },
-    { id:"rev4", hotelId:"h3", roomTypeId:"h3r1", userId:"u-li", userName:"李伟", rating:5, content:"视野开阔，投影仪是真的大，前台还送了小吃。", date:todayStr(-6), reservationId:null },
-    { id:"rev5", hotelId:"h5", roomTypeId:"h5r1", userId:"u-wang", userName:"王芳", rating:4, content:"电竞椅很舒服，就是周末大堂人有点多。", date:todayStr(-4), reservationId:null }
+    { id:"rev1", roomTypeId:"rt4", userId:"u-guest", userName:"演示客人", rating:5, content:"阳台看海太值了，早餐也丰盛，下次还住。", date:todayStr(-3), reservationId:"r-seed-3" },
+    { id:"rev2", roomTypeId:"rt2", userId:"u-li", userName:"李伟", rating:5, content:"床很舒服，浴缸泡澡解乏，前台服务也热情。", date:todayStr(-9), reservationId:null },
+    { id:"rev3", roomTypeId:"rt2", userId:"u-wang", userName:"王芳", rating:4, content:"整体不错，隔音稍差一点，但位置和服务都好。", date:todayStr(-12), reservationId:null },
+    { id:"rev4", roomTypeId:"rt1", userId:"u-li", userName:"李伟", rating:4, content:"性价比高，房间干净，出差住完全够用。", date:todayStr(-15), reservationId:null }
   ];
-  return { users, hotels, roomTypes, rooms, reservations, payments, reviews, orderSeq:1006 };
+  return { users, roomTypes, rooms, reservations, payments, reviews, orderSeq:1006 };
 }
 
-/* ============ 状态存取 ============ */
-const DB_KEY = "hotel-platform-demo-v2", SES_KEY = "hotel-platform-demo-session";
+/* ============ 状态存取（localStorage 代替后端 MySQL，结构与仓库一致） ============ */
+const DB_KEY = "hotel-booking-demo-v1", SES_KEY = "hotel-booking-demo-session";
 let DB;
 try { DB = JSON.parse(localStorage.getItem(DB_KEY)) || seedData(); } catch(e){ DB = seedData(); }
 function save(){ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
@@ -302,13 +195,12 @@ const STATUS = {
   CANCELLED:{ t:"已取消", cls:"b-bad" }, EXPIRED:{ t:"超时取消", cls:"b-bad" }
 };
 const ROOM_STATUS = { VACANT:"空净", OCCUPIED:"在住", DIRTY:"空脏待清洁", MAINTENANCE:"维修中" };
-const hotelById = id => DB.hotels.find(h=>h.id===id);
 const rtById = id => DB.roomTypes.find(r=>r.id===id);
 const roomById = id => DB.rooms.find(r=>r.id===id);
 const resById = id => DB.reservations.find(r=>r.id===id);
 const userById = id => DB.users.find(u=>u.id===id);
-const hotelOfRt = rt => hotelById(rt.hotelId);
 
+/* 订单超时自动取消（对应后端 OrderTimeoutJob 定时任务） */
 function expireOrders(){
   const now = Date.now(); let changed = false;
   DB.reservations.forEach(r=>{
@@ -316,6 +208,7 @@ function expireOrders(){
   });
   if(changed) save();
 }
+/* 按晚库存：某房型在日期区间内每晚的剩余量取最小值 —— 防超卖核心口径 */
 function bookedOn(roomTypeId, night, excludeId){
   return DB.reservations.filter(r => r.id!==excludeId && ["UNPAID","PAID","CHECKED_IN"].includes(r.status)
     && r.checkIn <= night && night < r.checkOut)
@@ -326,14 +219,8 @@ function availability(roomTypeId, checkIn, checkOut, excludeId){
   const ns = nightList(checkIn, checkOut); if(!ns.length) return 0;
   return Math.min(...ns.map(n => rt.totalRooms - bookedOn(roomTypeId, n, excludeId)));
 }
-function hotelRooms(hotelId){ return DB.roomTypes.filter(r=>r.hotelId===hotelId && r.active); }
-function hotelFromPrice(hotelId){
-  const rs = hotelRooms(hotelId); if(!rs.length) return { price:0, orig:0 };
-  const m = rs.reduce((a,b)=> a.price<=b.price ? a : b);
-  return { price:m.price, orig:m.origPrice };
-}
-function reviewSummary(hotelId){
-  const rs = DB.reviews.filter(r=>r.hotelId===hotelId);
+function reviewSummary(roomTypeId){
+  const rs = DB.reviews.filter(r=>r.roomTypeId===roomTypeId);
   if(!rs.length) return { avg:0, count:0 };
   return { avg:(rs.reduce((s,r)=>s+r.rating,0)/rs.length).toFixed(1), count:rs.length };
 }
@@ -343,17 +230,16 @@ function canReview(res){
 </script>
 <script>
 /* ============ 导航与路由 ============ */
-let view = "list";
+let view = "rooms";
 let viewParam = null;
-let search = { checkIn: todayStr(0), checkOut: todayStr(1), kw: "", sort: "smart", chip: "ALL" };
-let pointsOn = false;
+let search = { checkIn: todayStr(0), checkOut: todayStr(1), guests: 2, kw: "" };
 let bookingDraft = { roomTypeId: null, checkIn: todayStr(0), checkOut: todayStr(1), rooms: 1 };
 let orderFilter = "ALL";
 
 function go(v, param){ view = v; viewParam = param ?? null; expireOrders(); render(); window.scrollTo(0,0); }
 function renderNav(){
   const u = me();
-  const items = [ ["list","🏠 酒店列表"], ["orders","🧾 我的订单"] ];
+  const items = [ ["rooms","🏠 房型预订"], ["orders","🧾 我的订单"] ];
   if(u && (u.role==="STAFF" || u.role==="ADMIN")) items.push(["pms","🛎️ 前台 PMS"]);
   if(u && u.role==="ADMIN") items.push(["admin","⚙️ 管理后台"]);
   $("#nav").innerHTML = items.map(([v,t]) =>
@@ -361,23 +247,14 @@ function renderNav(){
   $("#userBox").innerHTML = u
     ? `<span>👤 ${esc(u.name)} <span class="badge b-info">${{USER:"普通用户",STAFF:"前台",ADMIN:"管理员"}[u.role]}</span></span>
        <button class="nav-btn" onclick="logout()">退出</button>
-       <button class="nav-btn" title="恢复初始演示数据" onclick="resetData()">↺ 重置</button>`
+       <button class="nav-btn" title="恢复初始演示数据" onclick="resetData()">↺ 重置数据</button>`
     : `<button class="nav-btn" onclick="go('login')">登录</button><button class="nav-btn" onclick="go('register')">注册</button>
-       <button class="nav-btn" title="恢复初始演示数据" onclick="resetData()">↺ 重置</button>`;
-  $("#searchPill").innerHTML = `
-    <span class="city">郑州</span>
-    <span class="dates">
-      <span class="dl">住<br>离</span>
-      <span><input type="date" id="s-in" value="${search.checkIn}" onchange="search.checkIn=this.value"><br>
-      <input type="date" id="s-out" value="${search.checkOut}" onchange="search.checkOut=this.value"></span>
-    </span>
-    <span class="kw">🔍<input type="text" id="s-kw" placeholder="二七广场 / 地铁站 / 酒店名" value="${esc(search.kw)}"></span>
-    <button class="search-go" onclick="doSearch()">搜索</button>`;
+       <button class="nav-btn" title="恢复初始演示数据" onclick="resetData()">↺ 重置数据</button>`;
 }
 function render(){
   renderNav();
   const app = $("#app");
-  if(view==="list") app.innerHTML = viewList();
+  if(view==="rooms") app.innerHTML = viewRooms();
   else if(view==="detail") app.innerHTML = viewDetail(viewParam);
   else if(view==="booking") app.innerHTML = viewBooking();
   else if(view==="orders") app.innerHTML = viewOrders();
@@ -387,173 +264,138 @@ function render(){
   else if(view==="login") app.innerHTML = viewLogin();
   else if(view==="register") app.innerHTML = viewRegister();
 }
-function logout(){ setSession(null); toast("已退出登录"); go("list"); }
+function logout(){ setSession(null); toast("已退出登录"); go("rooms"); }
 function resetData(){
   if(!confirm("确定要重置吗？所有演示数据（订单、点评、房态等）将恢复到初始状态。")) return;
-  DB = seedData(); save(); setSession(null); pointsOn = false; toast("演示数据已重置"); go("list");
+  DB = seedData(); save(); setSession(null); toast("演示数据已重置"); go("rooms");
 }
 function requireLogin(){
   if(me()) return true;
   toast("请先登录"); go("login"); return false;
 }
-function doSearch(){
-  const ci = $("#s-in").value, co = $("#s-out").value;
-  if(!ci || !co || nightsBetween(ci,co) < 1){ toast("离店日期必须晚于入住日期"); return; }
-  search.checkIn = ci; search.checkOut = co; search.kw = $("#s-kw").value.trim();
-  go("list");
-}
 
-/* ============ 酒店列表（参考图样式） ============ */
-const CHIPS = [
-  ["ALL","全部"], ["神券商家","<span class='hot'>神券商家</span>"], ["大床房","大床房"], ["电竞酒店","电竞酒店"],
-  ["黄金会员","<span class='gold'>👑 黄金会员</span>"], ["双床房","双床房"], ["影音酒店","影音酒店"], ["免费停车场","免费停车场"]
-];
-function chipMatch(h, chip){
-  if(chip==="ALL") return true;
-  if(chip==="神券商家") return h.promo && h.promo.type==="神券";
-  if(chip==="黄金会员") return !!h.member;
-  if(chip==="大床房") return hotelRooms(h.id).some(r=>r.name.includes("大床"));
-  if(chip==="双床房") return hotelRooms(h.id).some(r=>r.name.includes("双床"));
-  return h.tags.includes(chip);
-}
-function viewList(){
-  let list = DB.hotels.slice();
-  const kw = search.kw;
-  if(kw) list = list.filter(h => h.name.includes(kw) || h.landmark.includes(kw) || h.tags.some(t=>t.includes(kw)));
-  list = list.filter(h => chipMatch(h, search.chip));
-  const fp = h => hotelFromPrice(h.id).price;
-  if(search.sort==="priceAsc") list.sort((a,b)=>fp(a)-fp(b));
-  else if(search.sort==="priceDesc") list.sort((a,b)=>fp(b)-fp(a));
-  else if(search.sort==="score") list.sort((a,b)=>b.score-a.score);
-  else if(search.sort==="distance") list.sort((a,b)=>a.distanceKm-b.distanceKm);
-  else list.sort((a,b)=> (b.score*100 - fp(b)/10) - (a.score*100 - fp(a)/10));
+/* ============ 房型浏览 / 搜索 ============ */
+function viewRooms(){
+  const { checkIn, checkOut, guests, kw } = search;
+  const list = DB.roomTypes.filter(rt => rt.active)
+    .filter(rt => rt.capacity >= Number(guests))
+    .filter(rt => !kw || rt.name.includes(kw) || rt.desc.includes(kw));
   return `
-  <div class="sheet">
-    <div class="sort-row">
-      <select id="sort-sel" onchange="search.sort=this.value;render()">
-        <option value="smart" ${search.sort==="smart"?"selected":""}>智能排序</option>
-        <option value="distance" ${search.sort==="distance"?"selected":""}>位置距离 · 近到远</option>
-        <option value="priceAsc" ${search.sort==="priceAsc"?"selected":""}>价格 · 低到高</option>
-        <option value="priceDesc" ${search.sort==="priceDesc"?"selected":""}>价格 · 高到低</option>
-        <option value="score" ${search.sort==="score"?"selected":""}>评分 · 高到低</option>
-      </select>
-      <span class="sort-note">${search.checkIn} 住 · ${search.checkOut} 离 · 共 ${list.length} 家酒店</span>
+  <div class="card">
+    <h2>预订房间</h2>
+    <div class="note">这是与仓库中 Spring Boot + Vue 正式版功能一一对应的单文件演示版：数据保存在浏览器本地（localStorage），库存按「每一晚」核算、库存不足会拦截下单（防超卖），待支付订单 ${PAY_MINUTES} 分钟未付自动取消。正式版代码在 GitHub 仓库 hotel-booking-system。</div>
+    <div class="search-bar">
+      <label class="field">入住日期<input type="date" id="s-in" value="${checkIn}"></label>
+      <label class="field">离店日期<input type="date" id="s-out" value="${checkOut}"></label>
+      <label class="field">入住人数
+        <select id="s-guests">${[1,2,3,4].map(n=>`<option value="${n}" ${Number(guests)===n?"selected":""}>${n} 人</option>`).join("")}</select>
+      </label>
+      <label class="field">关键词<input type="text" id="s-kw" placeholder="如：海景 / 办公" value="${esc(kw)}"></label>
+      <button class="btn" onclick="doSearch()">🔍 查询空房</button>
     </div>
-    <div class="chip-row">
-      ${CHIPS.map(([k,label])=>`<button class="fchip ${search.chip===k?'on':''}" onclick="search.chip='${k}';render()">${label}</button>`).join("")}
-    </div>
-    <div class="points-bar">
-      <span class="coin">🪙</span>
-      <span>${pointsOn ? `已开启积分抵扣：下单按 ${POINTS} 积分抵 ${money(POINTS_YUAN)} 展示抵后价` : `100积分可抵 ${money(1)}，开启后查看抵后价（你有 ${POINTS} 积分）`}</span>
-      <button class="${pointsOn?'off':''}" onclick="pointsOn=!pointsOn;render()">${pointsOn ? "关闭抵扣" : "立即抵扣"}</button>
-    </div>
-    ${list.map(h=>{
-      const f = hotelFromPrice(h.id);
-      const shown = pointsOn ? Math.max(f.price - POINTS_YUAN, 1) : f.price;
-      return `<div class="hotel" onclick="go('detail','${h.id}')">
-        <div class="cover ${h.grade}">${h.icon}<span class="bdg">✔ ${esc(h.badge)}</span><span class="play">▶</span></div>
-        <div class="h-body">
-          <div class="h-name">${esc(h.name)}<span class="kind">${esc(h.kind)}</span> 👑</div>
-          <div class="score-row"><span class="score">${h.score.toFixed(1)}</span><span class="score-word">${esc(h.scoreWord)}</span><span class="quote">“${esc(h.quote)}”</span></div>
-          <div class="tags">${h.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
-          <div class="dist">${esc(h.distanceText)}</div>
-          ${h.streak ? `<div class="streak">连续${h.streak}位住客好评</div>` : ""}
-          ${h.rankNote ? `<div class="streak" style="color:#B07D2B">🏆 ${esc(h.rankNote)}</div>` : ""}
-          <div class="h-bottom">
-            <span class="sales">${esc(h.sales)}</span>
-            <span class="price-box">
-              <span class="orig">${money(f.orig)}</span><span class="price"><small>¥</small>${shown}</span> <span class="qi">起</span>
-              ${pointsOn ? `<div class="promo">积分抵后价 · 已抵 ${money(POINTS_YUAN)}</div>` : (h.promo ? `<div class="promo"><b>${esc(h.promo.type)}</b>${esc(h.promo.text)} ›</div>` : "")}
-            </span>
+  </div>
+  <div class="grid">
+    ${list.map(rt=>{
+      const av = availability(rt.id, checkIn, checkOut);
+      const rs = reviewSummary(rt.id);
+      return `<div class="room-card">
+        <div class="room-cover ${rt.grade}">${rt.icon}</div>
+        <div class="room-body">
+          <h3>${esc(rt.name)}</h3>
+          <div class="specs">${rt.area}㎡ · ${esc(rt.bed)} · 可住 ${rt.capacity} 人</div>
+          <div class="specs">${esc(rt.desc)}</div>
+          <div class="chips">${rt.amenities.map(a=>`<span class="chip">${esc(a)}</span>`).join("")}</div>
+          <div>${rs.count ? `<span class="stars">${"★".repeat(Math.round(rs.avg))}</span> <b>${rs.avg}</b> 分 · ${rs.count} 条点评` : `<span class="muted">暂无点评</span>`}</div>
+          <div class="price-row">
+            <span class="price">${money(rt.price)}<small> / 晚</small></span>
+            ${av>0 ? `<span class="badge ${av<=2?"b-warn":"b-ok"}">所选日期剩 ${av} 间</span>` : `<span class="badge b-bad">所选日期已订满</span>`}
+          </div>
+          <div class="actions">
+            <button class="btn light" onclick="go('detail','${rt.id}')">查看详情 / 点评</button>
+            <button class="btn" ${av<=0?"disabled":""} onclick="startBooking('${rt.id}')">立即预订</button>
           </div>
         </div>
       </div>`;
-    }).join("") || `<p class="muted" style="padding:24px 0">没有符合条件的酒店，换个关键词或筛选试试。</p>`}
-    <p class="muted" style="padding-top:14px">演示说明：本页为仓库 hotel-booking-system 的单文件全功能演示版，风格按美团酒店列表页复刻；酒店为郑州地区演示数据，下单、支付、入住、后台均为真实可操作流程（数据存浏览器本地）。正式版为 Spring Boot + Vue + MySQL，代码见仓库。</p>
+    }).join("") || `<div class="card">没有符合条件的房型，换个日期或人数试试。</div>`}
   </div>`;
 }
-
-/* ============ 酒店详情：房型列表 + 点评 ============ */
-function viewDetail(hotelId){
-  const h = hotelById(hotelId);
-  if(!h) return `<div class="card">酒店不存在。<a href="javascript:go('list')">返回列表</a></div>`;
-  const rs = reviewSummary(hotelId);
-  const revs = DB.reviews.filter(r=>r.hotelId===hotelId).slice().reverse();
-  const f = hotelFromPrice(hotelId);
-  return `
-  <div class="card">
-    <button class="btn light small" onclick="go('list')">← 返回酒店列表</button>
-    <div class="cover ${h.grade}" style="width:100%;height:170px;margin:14px 0;font-size:64px">${h.icon}<span class="bdg">✔ ${esc(h.badge)}</span></div>
-    <h2 style="margin-bottom:6px">${esc(h.name)} <span class="kind">${esc(h.kind)}</span> 👑</h2>
-    <div class="score-row"><span class="score">${h.score.toFixed(1)}</span><span class="score-word">${esc(h.scoreWord)}</span><span class="quote">“${esc(h.quote)}”</span>
-    <span class="muted">住客点评均分 ${rs.count ? rs.avg : "暂无"}（${rs.count} 条）</span></div>
-    <div class="tags">${h.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
-    <p class="dist">📍 ${esc(h.distanceText)} · 地标：${esc(h.landmark)}</p>
-    ${h.promo ? `<p><span class="promo"><b>${esc(h.promo.type)}</b>${esc(h.promo.text)}</span></p>` : ""}
-    <h3>可选房型（${search.checkIn} → ${search.checkOut}，${nightsBetween(search.checkIn, search.checkOut)} 晚）</h3>
-    ${hotelRooms(hotelId).map(rt=>{
-      const av = availability(rt.id, search.checkIn, search.checkOut);
-      return `<div class="room-row">
-        <div class="rr-main">
-          <b style="font-size:16px">${esc(rt.name)}</b>
-          <div class="muted">${rt.area}㎡ · ${esc(rt.bed)} · 可住 ${rt.capacity} 人 · ${rt.amenities.map(esc).join(" / ")}</div>
-          <div>${av>0 ? `<span class="badge ${av<=2?"b-warn":"b-ok"}">剩 ${av} 间</span>` : `<span class="badge b-bad">所选日期已订满</span>`}</div>
-        </div>
-        <div style="text-align:right">
-          <span class="orig">${money(rt.origPrice)}</span><span class="price"><small>¥</small>${rt.price}</span><div class="muted">每晚均价</div>
-        </div>
-        <button class="btn red" ${av<=0?"disabled":""} onclick="startBooking('${rt.id}')">预订</button>
-      </div>`;
-    }).join("")}
-  </div>
-  <div class="card">
-    <h2>住客点评</h2>
-    ${revs.map(r=>`<div class="review">
-      <b>${esc(r.userName)}</b> <span class="stars">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</span>
-      <span class="muted">${r.date} · ${esc(rtById(r.roomTypeId)?.name || "")}</span><div style="margin-top:4px">${esc(r.content)}</div>
-    </div>`).join("") || `<p class="muted">暂无点评。完成一次入住后，可以在订单详情里点评。</p>`}
-    <h3>写点评</h3>
-    <div class="form-grid">
-      <label class="field">评分<select id="rev-rating">${[5,4,3,2,1].map(n=>`<option value="${n}">${n} 分</option>`).join("")}</select></label>
-      <label class="field" style="grid-column:span 2">内容<input type="text" id="rev-content" placeholder="说说这次入住体验"></label>
-    </div>
-    <div class="actions"><button class="btn" onclick="addReview('${h.id}', null)">发布点评</button></div>
-  </div>`;
-}
-function addReview(hotelId, reservationId){
-  if(!requireLogin()) return;
-  const fromOrder = !!reservationId;
-  const content = (fromOrder ? $("#rev-content-od") : $("#rev-content")).value.trim();
-  const rating = Number((fromOrder ? $("#rev-rating-od") : $("#rev-rating")).value);
-  if(!content){ toast("先写一句点评内容吧"); return; }
-  const rtId = fromOrder ? resById(reservationId).items[0].roomTypeId : hotelRooms(hotelId)[0]?.id;
-  DB.reviews.push({ id:uid("rev-"), hotelId, roomTypeId: rtId, userId:me().id, userName:me().name, rating, content, date:todayStr(0), reservationId: reservationId || null });
-  save(); toast("点评已发布"); closeModal();
-  if(fromOrder) go("orderDetail", reservationId); else go("detail", hotelId);
+function doSearch(){
+  const ci = $("#s-in").value, co = $("#s-out").value;
+  if(!ci || !co || nightsBetween(ci,co) < 1){ toast("离店日期必须晚于入住日期"); return; }
+  search = { checkIn:ci, checkOut:co, guests:$("#s-guests").value, kw:$("#s-kw").value.trim() };
+  render();
 }
 function startBooking(rtId){
   bookingDraft = { roomTypeId: rtId, checkIn: search.checkIn, checkOut: search.checkOut, rooms: 1 };
   go("booking");
 }
 
-/* ============ 预订下单 ============ */
+/* ============ 房型详情 + 点评 ============ */
+function viewDetail(rtId){
+  const rt = rtById(rtId);
+  if(!rt) return `<div class="card">房型不存在。<a href="javascript:go('rooms')">返回</a></div>`;
+  const rs = reviewSummary(rtId);
+  const revs = DB.reviews.filter(r=>r.roomTypeId===rtId).slice().reverse();
+  const av = availability(rtId, search.checkIn, search.checkOut);
+  return `
+  <div class="card">
+    <button class="btn light small" onclick="go('rooms')">← 返回房型列表</button>
+    <div class="room-cover ${rt.grade}" style="border-radius:18px;margin:14px 0;height:150px">${rt.icon}</div>
+    <h2>${esc(rt.name)}</h2>
+    <p class="specs" style="font-size:14px">${rt.area}㎡ · ${esc(rt.bed)} · 可住 ${rt.capacity} 人 · 共 ${rt.totalRooms} 间</p>
+    <p style="margin:10px 0">${esc(rt.desc)}</p>
+    <div class="chips">${rt.amenities.map(a=>`<span class="chip">${esc(a)}</span>`).join("")}</div>
+    <div class="price-row" style="margin-top:14px">
+      <span class="price">${money(rt.price)}<small> / 晚</small></span>
+      ${av>0 ? `<span class="badge b-ok">${search.checkIn} ~ ${search.checkOut} 剩 ${av} 间</span>` : `<span class="badge b-bad">所选日期已订满</span>`}
+      <button class="btn" ${av<=0?"disabled":""} onclick="startBooking('${rt.id}')">立即预订</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>住客点评 ${rs.count ? `· ${rs.avg} 分（${rs.count} 条）` : ""}</h2>
+    ${revs.map(r=>`<div class="review">
+      <b>${esc(r.userName)}</b> <span class="stars">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</span>
+      <span class="muted">${r.date}</span><div style="margin-top:4px">${esc(r.content)}</div>
+    </div>`).join("") || `<p class="muted">暂无点评。完成一次入住后，可以在订单详情里点评。</p>`}
+    <h3>写点评</h3>
+    <div class="form-grid">
+      <label class="field">评分
+        <select id="rev-rating">${[5,4,3,2,1].map(n=>`<option value="${n}">${n} 分</option>`).join("")}</select>
+      </label>
+      <label class="field" style="grid-column:span 2">内容<input type="text" id="rev-content" placeholder="说说这次入住体验"></label>
+    </div>
+    <div class="actions"><button class="btn" onclick="addReview('${rt.id}')">发布点评</button></div>
+    <p class="muted" style="margin-top:8px">提示：在「我的订单」里对已完成订单点评，会和订单绑定，更真实。</p>
+  </div>`;
+}
+function addReview(roomTypeId, reservationId){
+  if(!requireLogin()) return;
+  const contentEl = $("#rev-content");
+  const content = reservationId ? $("#rev-content-od").value.trim() : (contentEl ? contentEl.value.trim() : "");
+  const rating = Number((reservationId ? $("#rev-rating-od") : $("#rev-rating")).value);
+  if(!content){ toast("先写一句点评内容吧"); return; }
+  DB.reviews.push({ id:uid("rev-"), roomTypeId, userId:me().id, userName:me().name, rating, content, date:todayStr(0), reservationId: reservationId || null });
+  save(); toast("点评已发布"); closeModal();
+  if(reservationId) go("orderDetail", reservationId); else go("detail", roomTypeId);
+}
+
+/* ============ 预订下单（防超卖校验） ============ */
 function viewBooking(){
   if(!bookingDraft.roomTypeId) bookingDraft.roomTypeId = DB.roomTypes[0].id;
   const rt = rtById(bookingDraft.roomTypeId);
-  const h = hotelOfRt(rt);
   const u = me();
   const nights = Math.max(0, nightsBetween(bookingDraft.checkIn, bookingDraft.checkOut));
   const av = availability(rt.id, bookingDraft.checkIn, bookingDraft.checkOut);
-  const gross = nights * rt.price * Number(bookingDraft.rooms || 1);
-  const discount = pointsOn ? Math.min(POINTS_YUAN, gross) : 0;
-  const total = gross - discount;
-  const allRooms = DB.hotels.map(hh => `<optgroup label="${esc(hh.name)}">${hotelRooms(hh.id).map(r=>`<option value="${r.id}" ${r.id===rt.id?"selected":""}>${esc(r.name)}（${money(r.price)}/晚）</option>`).join("")}</optgroup>`).join("");
+  const total = nights * rt.price * Number(bookingDraft.rooms || 1);
   return `
   <div class="card">
     <h2>填写预订信息</h2>
-    <p style="margin-bottom:12px"><b>${esc(h.name)}</b> · ${esc(rt.name)}</p>
     <div class="form-grid">
-      <label class="field">酒店 / 房型<select id="b-type" onchange="updBooking('roomTypeId', this.value)">${allRooms}</select></label>
+      <label class="field">房型
+        <select id="b-type" onchange="updBooking('roomTypeId', this.value)">
+          ${DB.roomTypes.filter(r=>r.active).map(r=>`<option value="${r.id}" ${r.id===rt.id?"selected":""}>${esc(r.name)}（${money(r.price)}/晚）</option>`).join("")}
+        </select>
+      </label>
       <label class="field">房间数
         <select id="b-rooms" onchange="updBooking('rooms', this.value)">
           ${[1,2,3].map(n=>`<option value="${n}" ${Number(bookingDraft.rooms)===n?"selected":""}>${n} 间</option>`).join("")}
@@ -563,14 +405,12 @@ function viewBooking(){
       <label class="field">离店日期<input type="date" id="b-out" value="${bookingDraft.checkOut}" onchange="updBooking('checkOut', this.value)"></label>
       <label class="field">入住人姓名<input type="text" id="b-name" value="${esc(bookingDraft.guestName ?? (u ? u.name : ""))}" placeholder="如：张三"></label>
       <label class="field">手机号<input type="tel" id="b-phone" value="${esc(bookingDraft.guestPhone ?? (u ? u.phone : ""))}" placeholder="11 位手机号"></label>
-      <label class="field" style="grid-column:span 2">备注<input type="text" id="b-remark" value="${esc(bookingDraft.remark ?? "")}" placeholder="如：高楼层 / 晚到店（选填）"></label>
+      <label class="field" style="grid-column:span 2">备注<input type="text" id="b-remark" value="${esc(bookingDraft.remark ?? "")}" placeholder="如：高楼层 / 需要婴儿床（选填）"></label>
     </div>
     <h3>费用明细</h3>
     <table>
       <tr><th>房型</th><th>单价</th><th>晚数</th><th>房间数</th><th>小计</th></tr>
-      <tr><td>${esc(rt.name)}</td><td>${money(rt.price)}（划线 ${money(rt.origPrice)}）</td><td>${nights} 晚</td><td>${bookingDraft.rooms} 间</td><td>${money(gross)}</td></tr>
-      ${discount ? `<tr><td colspan="4">积分抵扣（${POINTS} 积分）</td><td style="color:#FA3E3E">-${money(discount)}</td></tr>` : ""}
-      <tr><td colspan="4"><b>应付</b></td><td><b style="color:#FA3E3E">${money(total)}</b></td></tr>
+      <tr><td>${esc(rt.name)}</td><td>${money(rt.price)}</td><td>${nights} 晚</td><td>${bookingDraft.rooms} 间</td><td><b>${money(total)}</b></td></tr>
     </table>
     <p style="margin-top:10px">
       ${nights<1 ? `<span class="badge b-bad">日期不合法：离店必须晚于入住</span>`
@@ -578,8 +418,8 @@ function viewBooking(){
         : `<span class="badge b-bad">库存不足：所选区间最多可订 ${Math.max(av,0)} 间（防超卖拦截）</span>`}
     </p>
     <div class="actions">
-      <button class="btn light" onclick="go('detail','${h.id}')">返回酒店</button>
-      <button class="btn red" ${nights<1 || av < Number(bookingDraft.rooms) ? "disabled":""} onclick="submitBooking(${discount})">提交订单（待支付）</button>
+      <button class="btn light" onclick="go('rooms')">返回</button>
+      <button class="btn" ${nights<1 || av < Number(bookingDraft.rooms) ? "disabled":""} onclick="submitBooking()">提交订单（待支付）</button>
     </div>
     <p class="muted" style="margin-top:8px">提交后订单为「待支付」，请在 ${PAY_MINUTES} 分钟内完成支付，超时将自动取消并释放库存。</p>
   </div>`;
@@ -589,7 +429,7 @@ function updBooking(k, v){
   if(n) bookingDraft.guestName = n.value; if(p) bookingDraft.guestPhone = p.value; if(rm) bookingDraft.remark = rm.value;
   bookingDraft[k] = (k==="rooms") ? Number(v) : v; render();
 }
-function submitBooking(discount){
+function submitBooking(){
   if(!requireLogin()) return;
   const rt = rtById(bookingDraft.roomTypeId);
   const name = $("#b-name").value.trim(), phone = $("#b-phone").value.trim();
@@ -597,15 +437,16 @@ function submitBooking(discount){
   if(!/^1\d{10}$/.test(phone)){ toast("请填写正确的 11 位手机号"); return; }
   const nights = nightsBetween(bookingDraft.checkIn, bookingDraft.checkOut);
   if(nights < 1){ toast("日期不合法"); return; }
+  /* 下单瞬间再次按晚校验库存 —— 与后端事务内的防超卖校验同一口径 */
   const av = availability(rt.id, bookingDraft.checkIn, bookingDraft.checkOut);
   if(av < bookingDraft.rooms){ toast(`库存不足，最多可订 ${Math.max(av,0)} 间`); render(); return; }
-  const total = nights * rt.price * bookingDraft.rooms - (discount || 0);
+  const total = nights * rt.price * bookingDraft.rooms;
   const res = {
     id: uid("r-"), orderNo: "HB" + todayStr(0).replaceAll("-","") + String(DB.orderSeq++).padStart(4,"0"),
     userId: me().id, guestName: name, guestPhone: phone,
     items: [{ roomTypeId: rt.id, rooms: bookingDraft.rooms, price: rt.price }],
     checkIn: bookingDraft.checkIn, checkOut: bookingDraft.checkOut,
-    totalAmount: total, pointsDiscount: discount || 0, status: "UNPAID", createdAt: Date.now(), paidAt: null,
+    totalAmount: total, status: "UNPAID", createdAt: Date.now(), paidAt: null,
     assignedRoomId: null, remark: $("#b-remark").value.trim()
   };
   DB.reservations.push(res); save();
@@ -614,13 +455,8 @@ function submitBooking(discount){
 }
 </script>
 <script>
-/* ============ 我的订单 / 详情 / 支付 / 取消 ============ */
-function resTitle(r){
-  return r.items.map(it => {
-    const rt = rtById(it.roomTypeId); if(!rt) return "房型 × " + it.rooms + "间";
-    return `${esc(hotelOfRt(rt).name)} · ${esc(rt.name)} × ${it.rooms}间`;
-  }).join("，");
-}
+/* ============ 我的订单 / 订单详情 / 支付 / 取消 ============ */
+function resTitle(r){ return r.items.map(it => `${esc(rtById(it.roomTypeId)?.name || "房型")} × ${it.rooms}间`).join("，"); }
 function remainText(r){
   const left = PAY_MINUTES*60*1000 - (Date.now() - r.createdAt);
   if(left <= 0) return "已超时";
@@ -640,18 +476,21 @@ function viewOrders(){
     <div class="tabs">${tabs.map(([k,t])=>`<button class="tab ${orderFilter===k?'active':''}" onclick="orderFilter='${k}';render()">${t}</button>`).join("")}</div>
     ${list.map(r=>`
     <div class="order-card">
-      <div class="order-head"><span class="order-no">${r.orderNo}</span><span class="badge ${STATUS[r.status].cls}">${STATUS[r.status].t}</span></div>
+      <div class="order-head">
+        <span class="order-no">${r.orderNo}</span>
+        <span class="badge ${STATUS[r.status].cls}">${STATUS[r.status].t}</span>
+      </div>
       <div>${resTitle(r)}</div>
       <div class="muted">${r.checkIn} 入住 → ${r.checkOut} 离店 · ${nightsBetween(r.checkIn, r.checkOut)} 晚 · 入住人 ${esc(r.guestName)}</div>
-      <div style="margin-top:6px">总价 <b style="color:#FA3E3E">${money(r.totalAmount)}</b>
+      <div style="margin-top:6px">总价 <b style="color:#E2703A">${money(r.totalAmount)}</b>
         ${r.status==="UNPAID" ? `<span class="badge b-warn">${remainText(r)}</span>` : ""}
-        ${r.assignedRoomId ? `<span class="badge b-ok">房号 ${roomById(r.assignedRoomId)?.number || ""}</span>` : ""}
+        ${r.assignedRoomId ? `<span class="badge b-ok">房间 ${roomById(r.assignedRoomId)?.number || ""}</span>` : ""}
       </div>
       <div class="actions">
         <button class="btn light small" onclick="go('orderDetail','${r.id}')">订单详情</button>
-        ${r.status==="UNPAID" ? `<button class="btn red small" onclick="openPay('${r.id}')">立即支付</button>` : ""}
+        ${r.status==="UNPAID" ? `<button class="btn small" onclick="openPay('${r.id}')">立即支付</button>` : ""}
         ${["UNPAID","PAID"].includes(r.status) ? `<button class="btn danger small" onclick="cancelOrder('${r.id}')">取消订单</button>` : ""}
-        ${r.status==="PAID" ? `<span class="muted">入住当天请带身份证到酒店前台办理入住</span>` : ""}
+        ${r.status==="PAID" ? `<span class="muted">入住当天请带身份证到前台办理入住</span>` : ""}
       </div>
     </div>`).join("") || `<p class="muted">这个状态下暂时没有订单。</p>`}
   </div>`;
@@ -668,7 +507,6 @@ function viewOrderDetail(id){
   const u = me();
   if(!u || (u.id!==r.userId && u.role==="USER")) return `<div class="card">无权查看此订单。</div>`;
   const pays = DB.payments.filter(p=>p.reservationId===r.id);
-  const rt0 = rtById(r.items[0].roomTypeId);
   return `
   <div class="card">
     <button class="btn light small" onclick="go('orders')">← 返回我的订单</button>
@@ -676,24 +514,22 @@ function viewOrderDetail(id){
     ${statusTimeline(r)}
     ${r.status==="UNPAID" ? `<p><span class="badge b-warn">${remainText(r)}，超时自动取消</span></p>` : ""}
     <dl class="kv" style="margin-top:10px">
-      <dt>酒店 / 房型</dt><dd>${resTitle(r)}</dd>
+      <dt>房型</dt><dd>${resTitle(r)}</dd>
       <dt>入住 / 离店</dt><dd>${r.checkIn} → ${r.checkOut}（${nightsBetween(r.checkIn, r.checkOut)} 晚）</dd>
       <dt>入住人</dt><dd>${esc(r.guestName)} · ${esc(r.guestPhone)}</dd>
       <dt>下单用户</dt><dd>${esc(userById(r.userId)?.name || "-")}</dd>
-      <dt>房号</dt><dd>${r.assignedRoomId ? roomById(r.assignedRoomId)?.number + " 房" : "入住时由前台分配"}</dd>
+      <dt>房间号</dt><dd>${r.assignedRoomId ? roomById(r.assignedRoomId)?.number + " 房" : "入住时由前台分配"}</dd>
       <dt>备注</dt><dd>${esc(r.remark) || "无"}</dd>
-      ${r.pointsDiscount ? `<dt>积分抵扣</dt><dd style="color:#FA3E3E">-${money(r.pointsDiscount)}</dd>` : ""}
-      <dt>订单总价</dt><dd style="color:#FA3E3E">${money(r.totalAmount)}</dd>
+      <dt>订单总价</dt><dd style="color:#E2703A">${money(r.totalAmount)}</dd>
     </dl>
     <h3>支付记录</h3>
     ${pays.length ? `<table><tr><th>方式</th><th>金额</th><th>状态</th><th>流水号</th><th>时间</th></tr>
       ${pays.map(p=>`<tr><td>${p.method}</td><td>${money(p.amount)}</td><td>${p.status==="SUCCESS"?"支付成功":"已退款"}</td><td>${p.tradeNo}</td><td>${new Date(p.paidAt).toLocaleString("zh-CN")}</td></tr>`).join("")}</table>`
       : `<p class="muted">暂无支付记录。</p>`}
     <div class="actions">
-      ${r.status==="UNPAID" ? `<button class="btn red" onclick="openPay('${r.id}')">立即支付</button>` : ""}
+      ${r.status==="UNPAID" ? `<button class="btn" onclick="openPay('${r.id}')">立即支付</button>` : ""}
       ${["UNPAID","PAID"].includes(r.status) ? `<button class="btn danger" onclick="cancelOrder('${r.id}')">取消订单</button>` : ""}
       ${(u.role==="STAFF"||u.role==="ADMIN") && r.status==="PAID" ? `<button class="btn" onclick="go('pms')">去前台办理入住 →</button>` : ""}
-      ${rt0 ? `<button class="btn light" onclick="go('detail','${rt0.hotelId}')">查看这家酒店</button>` : ""}
     </div>
     ${canReview(r) ? `
     <h3>评价这次入住</h3>
@@ -701,7 +537,7 @@ function viewOrderDetail(id){
       <label class="field">评分<select id="rev-rating-od">${[5,4,3,2,1].map(n=>`<option value="${n}">${n} 分</option>`).join("")}</select></label>
       <label class="field" style="grid-column:span 2">内容<input type="text" id="rev-content-od" placeholder="说说这次入住体验"></label>
     </div>
-    <div class="actions"><button class="btn" onclick="addReview('${rt0.hotelId}','${r.id}')">发布点评</button></div>` : ""}
+    <div class="actions"><button class="btn" onclick="addReview('${r.items[0].roomTypeId}','${r.id}')">发布点评</button></div>` : ""}
     ${r.status==="COMPLETED" && DB.reviews.some(x=>x.reservationId===r.id) ? `<p class="muted" style="margin-top:10px">✅ 已点评，感谢反馈。</p>` : ""}
   </div>`;
 }
@@ -709,12 +545,14 @@ function openPay(id){
   const r = resById(id);
   openModal(`
     <h3>模拟支付 · ${money(r.totalAmount)}</h3>
-    <p class="muted" style="margin-bottom:12px">演示版不会真实扣款，选择一种方式即可完成支付。</p>
-    <label class="field">支付方式
-      <select id="pay-method"><option>微信支付</option><option>支付宝</option><option>银行卡</option><option>美团支付</option></select>
-    </label>
+    <p class="muted" style="margin-bottom:12px">演示版不会真实扣款，选择一种方式即可完成支付（对应后端 Payment 模块）。</p>
+    <div class="form-grid">
+      <label class="field">支付方式
+        <select id="pay-method"><option>微信支付</option><option>支付宝</option><option>银行卡</option></select>
+      </label>
+    </div>
     <div class="actions">
-      <button class="btn red" onclick="doPay('${id}')">确认支付 ${money(r.totalAmount)}</button>
+      <button class="btn" onclick="doPay('${id}')">确认支付 ${money(r.totalAmount)}</button>
       <button class="btn light" onclick="closeModal()">再想想</button>
     </div>`);
 }
@@ -737,27 +575,18 @@ function cancelOrder(id){
   r.status = "CANCELLED"; save(); toast("订单已取消"); render();
 }
 
-/* ============ 前台 PMS ============ */
-let pmsHotel = "ALL";
+/* ============ 前台 PMS：房态 / 入住 / 退房 ============ */
 function viewPms(){
   const u = me();
   if(!u || !(u.role==="STAFF" || u.role==="ADMIN")) return `<div class="card"><h2>前台 PMS</h2><p>该功能仅前台和管理员可用，请用 staff / admin 账号登录。</p><div class="actions"><button class="btn" onclick="go('login')">去登录</button></div></div>`;
   expireOrders();
   const t = todayStr(0);
-  const inScope = r => pmsHotel==="ALL" || rtById(r.items[0].roomTypeId)?.hotelId===pmsHotel;
-  const arrivals = DB.reservations.filter(r=>r.status==="PAID" && r.checkIn===t && inScope(r));
-  const inHouse = DB.reservations.filter(r=>r.status==="CHECKED_IN" && inScope(r));
-  const boardRooms = DB.rooms.filter(rm => pmsHotel==="ALL" || rtById(rm.roomTypeId)?.hotelId===pmsHotel);
-  const cnt = s => boardRooms.filter(r=>r.status===s).length;
+  const arrivals = DB.reservations.filter(r=>r.status==="PAID" && r.checkIn===t);
+  const inHouse = DB.reservations.filter(r=>r.status==="CHECKED_IN");
+  const cnt = s => DB.rooms.filter(r=>r.status===s).length;
   return `
   <div class="card">
     <h2>前台工作台 · ${t}</h2>
-    <label class="field" style="max-width:320px;margin-bottom:14px">选择酒店
-      <select onchange="pmsHotel=this.value;render()">
-        <option value="ALL" ${pmsHotel==="ALL"?"selected":""}>全部酒店</option>
-        ${DB.hotels.map(h=>`<option value="${h.id}" ${pmsHotel===h.id?"selected":""}>${esc(h.name)}</option>`).join("")}
-      </select>
-    </label>
     <div class="stats">
       <div class="stat"><div class="num">${arrivals.length}</div><div class="lbl">今日待入住</div></div>
       <div class="stat"><div class="num">${inHouse.length}</div><div class="lbl">当前在住</div></div>
@@ -784,11 +613,11 @@ function viewPms(){
   <div class="card">
     <h2>房态看板（点任意房间可改状态）</h2>
     <div class="board">
-      ${boardRooms.slice().sort((a,b)=>a.number-b.number).map(rm=>`<div class="cell st-${rm.status}" onclick="openRoomStatus('${rm.id}')">
+      ${DB.rooms.slice().sort((a,b)=>a.number-b.number).map(rm=>`<div class="cell st-${rm.status}" onclick="openRoomStatus('${rm.id}')">
         <div class="no">${rm.number}</div><div class="st">${ROOM_STATUS[rm.status]}</div><div class="tp">${esc(rtById(rm.roomTypeId)?.name || "")}</div>
       </div>`).join("")}
     </div>
-    <p class="muted" style="margin-top:10px">空净 = 可售可入住；在住 = 已分配给在住订单；空脏 = 退房后待清洁；维修中 = 暂停售卖。</p>
+    <p class="muted" style="margin-top:10px">空净 = 可售可入住；在住 = 已分配给在住订单；空脏 = 退房后待清洁，清洁完成改回空净；维修中 = 暂停售卖。</p>
   </div>`;
 }
 function openCheckIn(resId){
@@ -798,7 +627,7 @@ function openCheckIn(resId){
   if(!free.length){ toast("该房型没有空净房了，请先在房态看板里把空脏房改为清洁完成"); return; }
   openModal(`
     <h3>办理入住 · ${r.orderNo}</h3>
-    <p style="margin-bottom:10px">${resTitle(r)} · 入住人 ${esc(r.guestName)}${r.remark ? " · 备注：" + esc(r.remark) : ""}</p>
+    <p style="margin-bottom:10px">${esc(rtById(typeId).name)} · 入住人 ${esc(r.guestName)}${r.remark ? " · 备注：" + esc(r.remark) : ""}</p>
     <label class="field">选择空净房
       <select id="ci-room">${free.map(rm=>`<option value="${rm.id}">${rm.number} 房</option>`).join("")}</select>
     </label>
@@ -837,12 +666,13 @@ function doRoomStatus(roomId){
   const rm = roomById(roomId);
   rm.status = $("#rs-status").value; save(); closeModal(); toast("房态已更新"); go("pms");
 }
-
+</script>
+<script>
 /* ============ 管理后台 ============ */
 function syncRooms(rt){
   const mine = DB.rooms.filter(r=>r.roomTypeId===rt.id);
   if(mine.length < rt.totalRooms){
-    let maxNo = mine.length ? Math.max(...mine.map(r=>r.number)) : 9000 + DB.rooms.length;
+    let maxNo = mine.length ? Math.max(...mine.map(r=>r.number)) : 100;
     for(let i=mine.length;i<rt.totalRooms;i++){
       maxNo += 1;
       DB.rooms.push({ id:uid("room-"), roomTypeId:rt.id, number:maxNo, status:"VACANT" });
@@ -866,9 +696,8 @@ function viewAdmin(){
   const occRate = totalRoomsAll ? Math.round(occupiedTonight/totalRoomsAll*100) : 0;
   return `
   <div class="card">
-    <h2>平台经营概览</h2>
+    <h2>经营概览</h2>
     <div class="stats">
-      <div class="stat"><div class="num">${DB.hotels.length}</div><div class="lbl">入驻酒店</div></div>
       <div class="stat"><div class="num">${DB.reservations.length}</div><div class="lbl">订单总数</div></div>
       <div class="stat"><div class="num">${money(revenue)}</div><div class="lbl">已收款（未扣退款）</div></div>
       <div class="stat"><div class="num">${money(refunded)}</div><div class="lbl">已退款</div></div>
@@ -877,12 +706,11 @@ function viewAdmin(){
     </div>
   </div>
   <div class="card">
-    <h2>酒店与房型管理</h2>
+    <h2>房型管理</h2>
     <table>
-      <tr><th>酒店</th><th>房型</th><th>价格/晚（划线）</th><th>间数</th><th>可住</th><th>状态</th><th>操作</th></tr>
+      <tr><th>房型</th><th>价格/晚</th><th>间数</th><th>可住</th><th>状态</th><th>操作</th></tr>
       ${DB.roomTypes.map(rt=>`<tr>
-        <td>${esc(hotelOfRt(rt).name.replace("酒店","酒店"))}</td><td>${esc(rt.name)}</td>
-        <td>${money(rt.price)}（${money(rt.origPrice)}）</td><td>${rt.totalRooms}</td><td>${rt.capacity} 人</td>
+        <td>${rt.icon} ${esc(rt.name)}</td><td>${money(rt.price)}</td><td>${rt.totalRooms}</td><td>${rt.capacity} 人</td>
         <td>${rt.active ? '<span class="badge b-ok">在售</span>' : '<span class="badge b-grey">已下架</span>'}</td>
         <td><button class="btn light small" onclick="openEditType('${rt.id}')">编辑</button>
             <button class="btn light small" onclick="toggleType('${rt.id}')">${rt.active ? "下架" : "上架"}</button></td>
@@ -893,7 +721,7 @@ function viewAdmin(){
   <div class="card">
     <h2>全部订单</h2>
     <table>
-      <tr><th>订单号</th><th>客人</th><th>酒店 / 房型</th><th>入住 → 离店</th><th>金额</th><th>状态</th><th></th></tr>
+      <tr><th>订单号</th><th>客人</th><th>房型</th><th>入住 → 离店</th><th>金额</th><th>状态</th><th></th></tr>
       ${DB.reservations.slice().reverse().map(r=>`<tr>
         <td>${r.orderNo}</td><td>${esc(r.guestName)}</td><td>${resTitle(r)}</td>
         <td>${r.checkIn} → ${r.checkOut}</td><td>${money(r.totalAmount)}</td>
@@ -909,20 +737,20 @@ function viewAdmin(){
       ${DB.users.map(x=>`<tr><td>${esc(x.username)}</td><td>${esc(x.name)}</td><td>${esc(x.phone)}</td>
         <td><span class="badge ${x.role==="USER"?"b-grey":"b-info"}">${{USER:"普通用户",STAFF:"前台",ADMIN:"管理员"}[x.role]}</span></td></tr>`).join("")}
     </table>
+    <p class="muted" style="margin-top:8px">演示版不在后台明文展示密码；正式版密码经哈希存储，接口由 JWT + 角色注解鉴权。</p>
   </div>`;
 }
 function toggleType(id){ const rt = rtById(id); rt.active = !rt.active; save(); toast(rt.active ? "已上架" : "已下架"); go("admin"); }
 function typeForm(rt){
   return `
   <div class="form-grid">
-    ${rt ? "" : `<label class="field">所属酒店<select id="tf-hotel">${DB.hotels.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join("")}</select></label>`}
-    <label class="field">房型名称<input type="text" id="tf-name" value="${rt ? esc(rt.name) : ""}" placeholder="如：影院大床房"></label>
-    <label class="field">价格（元/晚）<input type="number" id="tf-price" min="1" value="${rt ? rt.price : 199}"></label>
-    <label class="field">划线价（元/晚）<input type="number" id="tf-orig" min="1" value="${rt ? rt.origPrice : 399}"></label>
+    <label class="field">房型名称<input type="text" id="tf-name" value="${rt ? esc(rt.name) : ""}" placeholder="如：豪华大床房"></label>
+    <label class="field">价格（元/晚）<input type="number" id="tf-price" min="1" value="${rt ? rt.price : 399}"></label>
     <label class="field">房间总数<input type="number" id="tf-total" min="1" value="${rt ? rt.totalRooms : 3}"></label>
     <label class="field">可住人数<input type="number" id="tf-cap" min="1" value="${rt ? rt.capacity : 2}"></label>
-    <label class="field">面积（㎡）<input type="number" id="tf-area" min="1" value="${rt ? rt.area : 32}"></label>
+    <label class="field">面积（㎡）<input type="number" id="tf-area" min="1" value="${rt ? rt.area : 35}"></label>
     <label class="field">床型<input type="text" id="tf-bed" value="${rt ? esc(rt.bed) : "1.8m 大床"}"></label>
+    <label class="field" style="grid-column:span 2">简介<input type="text" id="tf-desc" value="${rt ? esc(rt.desc) : ""}" placeholder="一句话卖点"></label>
   </div>`;
 }
 function openEditType(id){ const rt = rtById(id); openModal(`<h3>编辑房型 · ${esc(rt.name)}</h3>${typeForm(rt)}
@@ -931,12 +759,12 @@ function openAddType(){ openModal(`<h3>新增房型</h3>${typeForm(null)}
   <div class="actions"><button class="btn" onclick="saveType(null)">创建</button><button class="btn light" onclick="closeModal()">取消</button></div>`); }
 function saveType(id){
   const name = $("#tf-name").value.trim();
-  const price = Number($("#tf-price").value), orig = Number($("#tf-orig").value), total = Number($("#tf-total").value), cap = Number($("#tf-cap").value);
+  const price = Number($("#tf-price").value), total = Number($("#tf-total").value), cap = Number($("#tf-cap").value);
   if(!name || !(price>0) || !(total>0) || !(cap>0)){ toast("名称、价格、间数、人数都要填对"); return; }
-  const data = { name, price, origPrice: orig>0?orig:price, totalRooms: total, capacity: cap, area: Number($("#tf-area").value)||30, bed: $("#tf-bed").value.trim()||"大床" };
+  const data = { name, price, totalRooms: total, capacity: cap, area: Number($("#tf-area").value)||30, bed: $("#tf-bed").value.trim()||"大床", desc: $("#tf-desc").value.trim() };
   if(id){ Object.assign(rtById(id), data); syncRooms(rtById(id)); }
   else {
-    const rt = { id:uid("rt-"), hotelId: $("#tf-hotel").value, ...data, amenities:["免费WiFi","空调"], active:true };
+    const rt = { id:uid("rt-"), ...data, grade:"g1", icon:"🛏️", amenities:["免费WiFi","空调","电视"], active:true };
     DB.roomTypes.push(rt); syncRooms(rt);
   }
   save(); closeModal(); toast("房型已保存"); go("admin");

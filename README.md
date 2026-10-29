@@ -1,14 +1,5 @@
 # 酒店客房预订系统 · 基础架构包
 
-## 2026-10-29 改版：多酒店平台（美团风）
-
-系统已由「单酒店」模型升级为「多酒店平台」模型，前端默认入口改为酒店列表页（黄色搜索头 + 排序/标签筛选 + 酒店卡片，参考美团酒店列表样式）：
-
-- **数据库**：`schema.sql` 新增 `hotel` 表，`room_type` 新增 `hotel_id`（归属酒店）与 `market_price`（划线价）；`seed.sql` 换成郑州 6 家酒店 / 18 个房型 / 64 间房的演示数据（含评分、标签、神券/会员促销、点评）。
-- **后端**：新增 `module/hotel` 模块与接口 `GET /api/hotels`（关键词/排序/标签筛选）、`GET /api/hotels/{id}`（含房型与点评汇总）；房型与可售查询返回 `hotelId` / `hotelName` / `marketPrice`，`/room-types` 支持 `hotelId` 过滤。
-- **前端**：新增 `HotelsView`（酒店列表）、`HotelDetailView`（酒店详情：按日期查库存、房型预订、按房型看点评）；原「客房预订」页保留为「全部房型」。
-- **单文件演示（免环境在线体验）**：https://3709384.github.io/hotel-booking-system/ （源码在 `demo/index.html`，数据口径与本次改版一致）。
-
 ## 公网访问
 
 - 免费长期网页：https://hotel-booking-web-3709384.onrender.com

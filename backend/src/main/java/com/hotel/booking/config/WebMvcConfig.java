@@ -27,7 +27,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/auth/login",
                         "/auth/register",
                         // C 端浏览与可售查询无需登录，与 API 文档契约一致
-                        "/hotels/**",
                         "/room-types/**",
                         "/availability",
                         // 支付回调由渠道服务端调用，通过签名校验而非登录态（真实接入时实现验签）

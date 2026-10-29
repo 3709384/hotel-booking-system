@@ -1,7 +1,6 @@
 package com.hotel.booking.module.room.service;
 
 import com.hotel.booking.common.BusinessException;
-import com.hotel.booking.module.hotel.mapper.HotelMapper;
 import com.hotel.booking.module.room.mapper.RoomInventoryMapper;
 import com.hotel.booking.module.room.mapper.RoomMapper;
 import com.hotel.booking.module.room.mapper.RoomTypeMapper;
@@ -26,14 +25,12 @@ class RoomServiceImplTest {
     private RoomMapper roomMapper;
     @Mock
     private RoomInventoryMapper inventoryMapper;
-    @Mock
-    private HotelMapper hotelMapper;
 
     @Test
     void availableInRangeReturnsMapperValue() {
         when(inventoryMapper.availableInRange(1L, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 3), 2L))
                 .thenReturn(4);
-        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper, hotelMapper);
+        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper);
 
         int available = service.availableInRange(1L, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 3), 2L);
 
@@ -46,7 +43,7 @@ class RoomServiceImplTest {
         LocalDate out = LocalDate.of(2026, 10, 3);
         when(inventoryMapper.deductStock(1L, in, 2)).thenReturn(1);
         when(inventoryMapper.deductStock(1L, in.plusDays(1), 2)).thenReturn(1);
-        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper, hotelMapper);
+        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper);
 
         assertThat(service.deductInventory(1L, in, out, 2)).isTrue();
 
@@ -60,7 +57,7 @@ class RoomServiceImplTest {
         LocalDate out = LocalDate.of(2026, 10, 3);
         when(inventoryMapper.deductStock(1L, in, 1)).thenReturn(1);
         when(inventoryMapper.deductStock(1L, in.plusDays(1), 1)).thenReturn(0);
-        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper, hotelMapper);
+        RoomServiceImpl service = new RoomServiceImpl(roomTypeMapper, roomMapper, inventoryMapper);
 
         assertThatThrownBy(() -> service.deductInventory(1L, in, out, 1))
                 .isInstanceOf(BusinessException.class);

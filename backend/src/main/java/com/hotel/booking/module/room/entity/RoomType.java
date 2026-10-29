@@ -21,8 +21,6 @@ public class RoomType {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 所属酒店ID（多酒店平台模型） */
-    private Long hotelId;
     private String code;
     private String name;
     private String bedType;
@@ -30,8 +28,6 @@ public class RoomType {
     private BigDecimal area;
     /** 基础房价（元/间夜），MVP 按此计价 */
     private BigDecimal basePrice;
-    /** 划线价/门市价（元/间夜，列表页展示，可空） */
-    private BigDecimal marketPrice;
     private String description;
     private String coverImage;
 

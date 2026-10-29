@@ -278,8 +278,8 @@ onMounted(loadAvailability)
   color: white;
   overflow: hidden;
   background:
-    linear-gradient(105deg, rgba(24, 20, 0, 0.97), rgba(96, 78, 10, 0.9)),
-    #171300;
+    linear-gradient(105deg, rgba(5, 43, 57, 0.97), rgba(16, 92, 111, 0.88)),
+    #0d4f65;
 }
 
 .rooms-hero::before {
@@ -376,7 +376,7 @@ onMounted(loadAvailability)
 .dialog-rating small { color: var(--muted); }
 .review-list { min-height: 180px; display: grid; gap: 12px; }
 .review-item { padding: 16px; display: grid; grid-template-columns: 44px 1fr; gap: 13px; border: 1px solid #eaecf0; border-radius: 14px; background: #fcfcfd; }
-.review-avatar { width: 44px; height: 44px; display: grid; place-items: center; color: #191919; border-radius: 50%; background: linear-gradient(135deg, #ffd100, #f2b705); font-weight: 800; }
+.review-avatar { width: 44px; height: 44px; display: grid; place-items: center; color: white; border-radius: 50%; background: linear-gradient(135deg, #176b87, #27a5a7); font-weight: 800; }
 .review-main { min-width: 0; }
 .review-top { display: flex; justify-content: space-between; gap: 12px; }
 .review-top span { color: var(--muted); font-size: 12px; }

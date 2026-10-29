@@ -12,8 +12,6 @@ import java.util.List;
 public class AvailabilityVO {
 
     private Long roomTypeId;
-    private Long hotelId;
-    private String hotelName;
     private String code;
     private String name;
     private String bedType;
@@ -22,7 +20,6 @@ public class AvailabilityVO {
     private String description;
     private String coverImage;
     private BigDecimal basePrice;
-    private BigDecimal marketPrice;
     private long nights;
     /** 区间内每夜最小可售间数；0 表示不可订 */
     private Integer minAvailable;

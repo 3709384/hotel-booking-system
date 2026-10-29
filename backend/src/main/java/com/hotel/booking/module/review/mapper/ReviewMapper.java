@@ -26,15 +26,6 @@ public interface ReviewMapper {
     @Select("SELECT COUNT(*) FROM review WHERE room_type_id = #{roomTypeId} AND status = 1")
     long countByRoomType(@Param("roomTypeId") Long roomTypeId);
 
-    /** 酒店维度点评总数：该酒店全部房型的点评之和（多酒店平台列表页用）。 */
-    @Select("""
-            SELECT COUNT(*)
-            FROM review r
-            JOIN room_type rt ON rt.id = r.room_type_id
-            WHERE rt.hotel_id = #{hotelId} AND r.status = 1
-            """)
-    long countByHotel(@Param("hotelId") Long hotelId);
-
     @Select("""
             SELECT COALESCE(AVG(score), 0) AS average_score,
                    COUNT(*) AS review_count
