@@ -9,12 +9,15 @@ import java.util.List;
 public class RoomTypeVO {
 
     private Long id;
+    private Long hotelId;
+    private String hotelName;
     private String code;
     private String name;
     private String bedType;
     private Integer maxOccupancy;
     private BigDecimal area;
     private BigDecimal basePrice;
+    private BigDecimal marketPrice;
     private String description;
     private String coverImage;
     private List<String> amenities;

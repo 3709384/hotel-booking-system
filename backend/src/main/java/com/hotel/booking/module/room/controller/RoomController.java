@@ -31,9 +31,10 @@ public class RoomController {
     @GetMapping("/room-types")
     public Result<PageResult<RoomTypeVO>> list(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long hotelId,
             @RequestParam(defaultValue = "1") long page,
             @RequestParam(defaultValue = "10") long size) {
-        PageResult<RoomTypeVO> result = roomService.listTypes(keyword, page, size);
+        PageResult<RoomTypeVO> result = roomService.listTypes(keyword, hotelId, page, size);
         result.getRecords().forEach(this::enrich);
         return Result.ok(result);
     }

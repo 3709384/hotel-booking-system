@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS room_inventory;
 DROP TABLE IF EXISTS room_rate;
 DROP TABLE IF EXISTS room;
 DROP TABLE IF EXISTS room_type;
+DROP TABLE IF EXISTS hotel;
 DROP TABLE IF EXISTS `user`;
 
 -- ---------------------------------------------------------------------
@@ -48,16 +49,49 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表(会员与员工)';
 
 -- ---------------------------------------------------------------------
--- 2. 房型表 room_type（客房类型，售卖与计价的主体）
+-- 1.5 酒店表 hotel（2026-10-29 改版新增：由单酒店模型升级为多酒店平台模型，
+--     对应美团式酒店列表页；房型通过 room_type.hotel_id 归属到酒店）
+-- ---------------------------------------------------------------------
+CREATE TABLE hotel (
+  id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '酒店ID',
+  name          VARCHAR(120) NOT NULL COMMENT '酒店名称, 如 明天假日酒店(郑州白庙地铁站店)',
+  kind          VARCHAR(20)  NULL COMMENT '档次:经济型/舒适型/高档型',
+  score         DECIMAL(2,1) NOT NULL DEFAULT 5.0 COMMENT '展示评分(1-5, 一位小数)',
+  score_word    VARCHAR(10)  NULL COMMENT '评分文案:超棒/很好/不错',
+  quote         VARCHAR(120) NULL COMMENT '住客代表性短评(列表页展示)',
+  tags          JSON         NULL COMMENT '酒店标签, 如["影音酒店","免费停车场"]',
+  distance_km   DECIMAL(5,1) NULL COMMENT '距参考点距离(公里, 用于距离排序)',
+  distance_text VARCHAR(120) NULL COMMENT '距离展示文案',
+  landmark      VARCHAR(50)  NULL COMMENT '地标(搜索关键词), 如 白庙地铁站/二七广场',
+  streak        INT          NULL COMMENT '连续好评住客数(列表页展示, 可空)',
+  sales_text    VARCHAR(30)  NULL COMMENT '消费量展示文案, 如 1万+消费',
+  badge         VARCHAR(20)  NULL COMMENT '角标:优美会/美团住吧',
+  promo_type    VARCHAR(10)  NULL COMMENT '促销类型:神券/会员',
+  promo_text    VARCHAR(80)  NULL COMMENT '促销文案, 如 立减294',
+  member        TINYINT      NOT NULL DEFAULT 0 COMMENT '是否黄金会员价酒店:1是 0否',
+  cover_image   VARCHAR(255) NULL COMMENT '封面图URL(迭代)',
+  icon          VARCHAR(8)   NULL COMMENT '封面占位图标(emoji)',
+  status        TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:1上架 0下架',
+  sort_order    INT          NOT NULL DEFAULT 0 COMMENT '排序值(小在前)',
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_hotel_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='酒店表(多酒店平台)';
+
+-- ---------------------------------------------------------------------
+-- 2. 房型表 room_type（客房类型，售卖与计价的主体；hotel_id 归属酒店）
 -- ---------------------------------------------------------------------
 CREATE TABLE room_type (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '房型ID',
+  hotel_id      BIGINT UNSIGNED NOT NULL COMMENT '所属酒店ID(逻辑外键)',
   code          VARCHAR(32)  NOT NULL COMMENT '房型编码',
   name          VARCHAR(50)  NOT NULL COMMENT '房型名称',
   bed_type      VARCHAR(32)  NULL COMMENT '床型, 如 大床1.8m/双床1.2m',
   max_occupancy INT          NOT NULL DEFAULT 2 COMMENT '最大入住人数',
   area          DECIMAL(6,2) NULL COMMENT '面积(平方米)',
   base_price    DECIMAL(10,2) NOT NULL COMMENT '基础房价(元/间夜, MVP按此计价)',
+  market_price  DECIMAL(10,2) NULL COMMENT '划线价/门市价(元/间夜, 列表页展示, 可空)',
   description   VARCHAR(500) NULL COMMENT '房型描述',
   cover_image   VARCHAR(255) NULL COMMENT '封面图URL(对象存储, 迭代)',
   amenities     JSON         NULL COMMENT '设施清单, 如["wifi","早餐","窗户"]',
@@ -67,7 +101,8 @@ CREATE TABLE room_type (
   updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_room_type_code (code),
-  KEY idx_room_type_status (status)
+  KEY idx_room_type_status (status),
+  KEY idx_room_type_hotel (hotel_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='客房类型表';
 
 -- ---------------------------------------------------------------------

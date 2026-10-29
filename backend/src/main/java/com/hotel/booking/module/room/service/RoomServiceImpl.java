@@ -10,6 +10,8 @@ import com.hotel.booking.module.room.dto.RoomTypeVO;
 import com.hotel.booking.module.room.entity.Room;
 import com.hotel.booking.module.room.entity.RoomInventory;
 import com.hotel.booking.module.room.entity.RoomType;
+import com.hotel.booking.module.hotel.entity.Hotel;
+import com.hotel.booking.module.hotel.mapper.HotelMapper;
 import com.hotel.booking.module.room.mapper.RoomInventoryMapper;
 import com.hotel.booking.module.room.mapper.RoomMapper;
 import com.hotel.booking.module.room.mapper.RoomTypeMapper;
@@ -28,18 +30,21 @@ public class RoomServiceImpl implements RoomService {
     private final RoomTypeMapper roomTypeMapper;
     private final RoomMapper roomMapper;
     private final RoomInventoryMapper inventoryMapper;
+    private final HotelMapper hotelMapper;
 
     public RoomServiceImpl(RoomTypeMapper roomTypeMapper, RoomMapper roomMapper,
-                           RoomInventoryMapper inventoryMapper) {
+                           RoomInventoryMapper inventoryMapper, HotelMapper hotelMapper) {
         this.roomTypeMapper = roomTypeMapper;
         this.roomMapper = roomMapper;
         this.inventoryMapper = inventoryMapper;
+        this.hotelMapper = hotelMapper;
     }
 
     @Override
-    public PageResult<RoomTypeVO> listTypes(String keyword, long page, long size) {
+    public PageResult<RoomTypeVO> listTypes(String keyword, Long hotelId, long page, long size) {
         LambdaQueryWrapper<RoomType> wrapper = new LambdaQueryWrapper<RoomType>()
                 .eq(RoomType::getStatus, 1)
+                .eq(hotelId != null, RoomType::getHotelId, hotelId)
                 .and(StringUtils.hasText(keyword),
                         w -> w.like(RoomType::getName, keyword).or().like(RoomType::getCode, keyword))
                 .orderByAsc(RoomType::getSortOrder).orderByAsc(RoomType::getId);
@@ -76,6 +81,8 @@ public class RoomServiceImpl implements RoomService {
             Integer min = availableInRange(t.getId(), checkIn, checkOut, nights);
             AvailabilityVO vo = new AvailabilityVO();
             vo.setRoomTypeId(t.getId());
+            vo.setHotelId(t.getHotelId());
+            vo.setHotelName(hotelNameOf(t.getHotelId()));
             vo.setCode(t.getCode());
             vo.setName(t.getName());
             vo.setBedType(t.getBedType());
@@ -84,6 +91,7 @@ public class RoomServiceImpl implements RoomService {
             vo.setDescription(t.getDescription());
             vo.setCoverImage(t.getCoverImage());
             vo.setBasePrice(t.getBasePrice());
+            vo.setMarketPrice(t.getMarketPrice());
             vo.setNights(nights);
             vo.setMinAvailable(min);
             vo.setTotalPrice(t.getBasePrice().multiply(BigDecimal.valueOf(nights)));
@@ -157,16 +165,27 @@ public class RoomServiceImpl implements RoomService {
     private RoomTypeVO toVO(RoomType t) {
         RoomTypeVO vo = new RoomTypeVO();
         vo.setId(t.getId());
+        vo.setHotelId(t.getHotelId());
+        vo.setHotelName(hotelNameOf(t.getHotelId()));
         vo.setCode(t.getCode());
         vo.setName(t.getName());
         vo.setBedType(t.getBedType());
         vo.setMaxOccupancy(t.getMaxOccupancy());
         vo.setArea(t.getArea());
         vo.setBasePrice(t.getBasePrice());
+        vo.setMarketPrice(t.getMarketPrice());
         vo.setDescription(t.getDescription());
         vo.setCoverImage(t.getCoverImage());
         vo.setAmenities(t.getAmenities());
         return vo;
+    }
+
+    private String hotelNameOf(Long hotelId) {
+        if (hotelId == null) {
+            return null;
+        }
+        Hotel hotel = hotelMapper.selectById(hotelId);
+        return hotel == null ? null : hotel.getName();
     }
 
     /** 极简字符串工具，避免额外依赖。 */

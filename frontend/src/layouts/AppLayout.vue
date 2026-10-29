@@ -8,7 +8,10 @@ const route = useRoute()
 const router = useRouter()
 
 const navItems = computed(() => {
-  const items = [{ label: '客房预订', path: '/rooms' }]
+  const items = [
+    { label: '酒店预订', path: '/hotels' },
+    { label: '全部房型', path: '/rooms' },
+  ]
   if (auth.role === 'MEMBER') {
     items.push({ label: '我的订单', path: '/orders' })
   }
@@ -37,11 +40,11 @@ function logout() {
   <div class="app-layout">
     <header class="topbar">
       <div class="topbar-inner">
-        <router-link to="/rooms" class="brand">
-          <span class="brand-mark">云</span>
+        <router-link to="/hotels" class="brand">
+          <span class="brand-mark">住</span>
           <span>
-            <strong>云栖酒店</strong>
-            <small>客房预订与接待系统</small>
+            <strong>云栖住吧</strong>
+            <small>郑州酒店预订平台</small>
           </span>
         </router-link>
 
@@ -101,12 +104,12 @@ function logout() {
   height: 42px;
   display: grid;
   place-items: center;
-  color: white;
+  color: #191919;
   font-size: 22px;
   font-weight: 800;
   border-radius: 13px;
-  background: linear-gradient(135deg, #176b87, #27a5a7);
-  box-shadow: 0 8px 18px rgba(23, 107, 135, 0.22);
+  background: linear-gradient(135deg, #ffe45c, #ffd100);
+  box-shadow: 0 8px 18px rgba(255, 209, 0, 0.35);
 }
 
 .brand strong,

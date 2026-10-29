@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface RoomService {
 
-    PageResult<RoomTypeVO> listTypes(String keyword, long page, long size);
+    PageResult<RoomTypeVO> listTypes(String keyword, Long hotelId, long page, long size);
 
     RoomTypeVO getType(Long id);
 
