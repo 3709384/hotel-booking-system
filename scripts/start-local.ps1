@@ -53,7 +53,7 @@ if (-not (Test-PortListening -Port 8080)) {
 }
 
 $backendReady = $false
-for ($i = 0; $i -lt 90; $i++) {
+for ($i = 0; $i -lt 600; $i++) {
     try {
         $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8080/api/health' -TimeoutSec 2
         if ($health.code -eq 0) { $backendReady = $true; break }
@@ -66,6 +66,17 @@ Write-Host 'Backend ready: http://127.0.0.1:8080/api'
 if (-not $NoFrontend) {
     if (-not (Test-PortListening -Port 5173)) {
         $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
+        if (-not (Test-Path (Join-Path $frontendDir 'node_modules'))) {
+            Write-Host 'Frontend dependencies not found. Running npm install (first run only, may take a few minutes)...'
+            Push-Location $frontendDir
+            try {
+                & $npm install
+                if ($LASTEXITCODE -ne 0) { throw 'npm install failed. Check your network and try again.' }
+            } finally {
+                Pop-Location
+            }
+            Write-Host 'Frontend dependencies installed.'
+        }
         $frontendProcess = Start-Process -FilePath $npm -ArgumentList @('run', 'dev', '--', '--host', '127.0.0.1') -WorkingDirectory $frontendDir -WindowStyle Hidden -RedirectStandardOutput (Join-Path $logDir 'frontend.out.log') -RedirectStandardError (Join-Path $logDir 'frontend.err.log') -PassThru
         Set-Content -LiteralPath (Join-Path $stateDir 'frontend.pid') -Value $frontendProcess.Id -Encoding ascii
         Write-Host "Starting frontend, PID $($frontendProcess.Id)..."
@@ -74,7 +85,7 @@ if (-not $NoFrontend) {
     }
 
     $frontendReady = $false
-    for ($i = 0; $i -lt 40; $i++) {
+    for ($i = 0; $i -lt 120; $i++) {
         try {
             $response = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:5173/' -TimeoutSec 2
             if ($response.StatusCode -eq 200) { $frontendReady = $true; break }
