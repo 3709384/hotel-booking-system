@@ -3,7 +3,6 @@
 ## 公网访问
 
 - 长期网页：https://hotel-booking-web-3709384.onrender.com
-- Railway部署：https://hotel-web-production-5a01.up.railway.app
 
 
 一套可直接作为开发依据的基础架构：**产品/设计文档 + 可执行数据库脚本 + 可运行的 Spring Boot 3 后端 + Vue 3 前端 + 容器化部署 + 可视化架构总览**。
