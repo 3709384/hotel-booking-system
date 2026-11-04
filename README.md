@@ -24,7 +24,7 @@
 
 ```
 酒店客房预订系统-基础架构/
-├── architecture-overview.html      # ★ 可视化架构总览（先看这个）
+├── architecture-overview.html      # ★ 可视化架构总览
 ├── README.md                        # 本文件：导航 + 快速开始
 ├── docs/                            # —— 设计文档（对应手册文档体系）——
 │   ├── 00-项目执行总路线.md           #   项目阶段、执行顺序和完成门槛

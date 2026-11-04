@@ -33,6 +33,8 @@ mybatis-plus:
 
 # 业务自定义配置
 app:
+  cors:
+    allowed-origins: "*"   # 本地入口页以 file:// 打开时需要允许状态探测
   jwt:
     secret: "hotel-booking-dev-secret-key-please-change-in-prod-0123456789"
     expire-seconds: 7200          # 令牌有效期 2 小时
