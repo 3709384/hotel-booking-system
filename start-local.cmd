@@ -1,6 +1,6 @@
 @echo off
 cd /d "%~dp0"
-pwsh -NoProfile -ExecutionPolicy Bypass -File "scripts\start-local.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\start-local.ps1"
 if errorlevel 1 (
   echo.
   echo Startup failed. Press any key to exit.
